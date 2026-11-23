@@ -1,4 +1,4 @@
-<title>حديقتي الجديدة</title>
+<title>داري الجديدة</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
@@ -79,18 +79,44 @@ ol.steps p{margin:0;color:var(--muted);font-size:.93rem}
 
 <div class="wrap" dir="rtl">
   <header>
-    <span class="eyebrow">تصميم جديد للجنينة · على نفس الصورة الحقيقية</span>
-    <h1>حديقتي الجديدة</h1>
-    <p class="lede">نفس المكان ونفس الزاوية تاع الصورة. حرّك الخط باش تقارن بين الحالة الحقيقية دروك والتصميم الجديد.</p>
+    <span class="eyebrow">تصميم جديد · على نفس الصور الحقيقية</span>
+    <h1>داري الجديدة</h1>
+    <p class="lede">المدخل والجنينة، بنفس المكان ونفس الزاوية تاع الصور. حرّك الخط باش تقارن بين الحالة الحقيقية دروك والتصميم الجديد.</p>
   </header>
 
-  <section class="compare" aria-label="مقارنة قبل وبعد">
+  <section class="compare" aria-label="مدخل الدار: قبل وبعد">
+    <h2>مدخل الدار</h2>
     <div class="tabs" role="group" aria-label="طريقة العرض">
-      <button type="button" id="m-split" data-mode="split" aria-pressed="true">مقارنة</button>
-      <button type="button" id="m-before" data-mode="before" aria-pressed="false">قبل (الصورة الحقيقية)</button>
-      <button type="button" id="m-after" data-mode="after" aria-pressed="false">بعد (التصميم)</button>
+      <button type="button" data-mode="split" aria-pressed="true">مقارنة</button>
+      <button type="button" data-mode="before" aria-pressed="false">قبل (الصورة الحقيقية)</button>
+      <button type="button" data-mode="after" aria-pressed="false">بعد (التصميم)</button>
     </div>
-    <div class="stage" id="stage" data-mode="split" style="--pos:50%">
+    <div class="stage" data-mode="split" style="--pos:50%">
+      <img src="entrance-after.jpg" alt="التصميم الجديد للمدخل: حيوط بيض، حافة سقف سوداء، عمود بالخشب، بلاط كبير، قصاري سود ونباتات وفنارات">
+      <img class="before" src="entrance-before.jpg" alt="الصورة الحقيقية لمدخل الدار قبل التعديل">
+      <div class="handle"></div>
+      <span class="tag l">قبل</span><span class="tag r">بعد</span>
+      <input type="range" id="pos-entrance" min="0" max="100" value="50" aria-label="خط المقارنة للمدخل">
+    </div>
+    <div class="changes">
+      <div class="chg"><b>الحيوط</b><p>تلبيس أملس بالأبيض الدافي على الدار، الطابق الفوقاني والحيط الحدودي. وزيد كوبين (couvertine) سوداء فوق الحيط.</p></div>
+      <div class="chg"><b>حافة السقف</b><p>حافة سوداء (anthracite) مع شريط LED دافي تحت السقف.</p></div>
+      <div class="chg"><b>العمود</b><p>مكسي بشرائح خشب عمودية (claustra bois)، وهي من أكثر الحاجات الموضة دروك.</p></div>
+      <div class="chg"><b>الأرضية</b><p>بلاط بورسلان كبير 60×120 بلون الحجر، وما يزلقش (antidérapant R11) لأنو برّا. والهوز (tuyau) يتخبّى في علبة.</p></div>
+      <div class="chg"><b>الشبّاك</b><p>إطار أسود وحجرة (appui) فاتحة تحته. والباب الحديد الأسود يبقى، يمشي مع التصميم.</p></div>
+      <div class="chg"><b>النباتات والضو</b><p>قصاري سود: زيتونة، حشيش زينة (Pennisetum)، وخزامى. فنارات up/down على الحيوط. والوردة والبوغنفيليا لي عندك يبقاو.</p></div>
+    </div>
+  </section>
+
+  <h2 style="margin-bottom:-24px">الجنينة</h2>
+
+  <section class="compare" aria-label="الجنينة: قبل وبعد">
+    <div class="tabs" role="group" aria-label="طريقة العرض">
+      <button type="button" data-mode="split" aria-pressed="true">مقارنة</button>
+      <button type="button" data-mode="before" aria-pressed="false">قبل (الصورة الحقيقية)</button>
+      <button type="button" data-mode="after" aria-pressed="false">بعد (التصميم)</button>
+    </div>
+    <div class="stage" data-mode="split" style="--pos:50%">
       <img src="after.jpg" alt="التصميم الجديد للحديقة: حيط ملبّس، حوض بحافة حجرية، نباتات، وقرافي مع حجر للمشي">
       <img class="before" src="before.jpg" alt="الصورة الحقيقية للحديقة قبل التعديل">
       <div class="handle"></div>
@@ -101,7 +127,7 @@ ol.steps p{margin:0;color:var(--muted);font-size:.93rem}
   </section>
 
   <section>
-    <h2>واش تبدّل</h2>
+    <h2>واش تبدّل في الجنينة</h2>
     <div class="changes">
       <div class="chg"><b>الحيط</b><p>تلبيس (enduit) ودهن بلون الرمل، مع شريط قرميدي فوق وزوج فنارات.</p></div>
       <div class="chg"><b>الحوض</b><p>نحّينا البلوكات المكسّرين ودرنا حافة حجرية مستقيمة، والتراب مغطّى بقشور الخشب (paillis).</p></div>
@@ -148,13 +174,12 @@ ol.steps p{margin:0;color:var(--muted);font-size:.93rem}
 </div>
 
 <script>
-(function(){
-  const stage=document.getElementById('stage'), range=document.getElementById('pos');
-  const set=v=>stage.style.setProperty('--pos',v+'%');
-  range.addEventListener('input',()=>set(range.value));
-  document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+document.querySelectorAll('.compare').forEach(sec=>{
+  const stage=sec.querySelector('.stage'), range=stage.querySelector('input'), btns=sec.querySelectorAll('.tabs button');
+  range.addEventListener('input',()=>stage.style.setProperty('--pos',range.value+'%'));
+  btns.forEach(b=>b.addEventListener('click',()=>{
     stage.dataset.mode=b.dataset.mode;
-    document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    btns.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
   }));
-})();
+});
 </script>
