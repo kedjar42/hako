@@ -1,0 +1,160 @@
+<title>حديقتي الجديدة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column, the before/after photo is the hero; below it plants and work steps. */
+:root{
+  --bg:#f3f1ea; --surface:#ffffff; --fg:#22281f; --muted:#5f6858; --line:#dcd8cb;
+  --olive:#4f6a3c; --terra:#b5623a; --lav:#6f58a8;
+  --display:"Readex Pro","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --body:"IBM Plex Sans Arabic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151912; --surface:#1e231b; --fg:#e9ebe2; --muted:#a3ab98; --line:#333b2d;
+  --olive:#9dbb82; --terra:#e08c62; --lav:#b9a6ec; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151912; --surface:#1e231b; --fg:#e9ebe2; --muted:#a3ab98; --line:#333b2d;
+  --olive:#9dbb82; --terra:#e08c62; --lav:#b9a6ec; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;gap:40px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.25}
+h1{font-size:clamp(1.8rem,4vw,2.6rem)}
+h2{font-size:1.35rem}
+.lede{color:var(--muted);max-width:62ch;margin:6px 0 0}
+header{display:grid;gap:4px}
+.eyebrow{font-size:.8rem;color:var(--olive);font-weight:600;letter-spacing:.02em}
+
+/* compare */
+.compare{display:grid;gap:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:inherit;font-weight:600;font-size:.92rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  padding:6px 16px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--olive);border-color:var(--olive);color:var(--bg)}
+.tabs button:focus-visible,.stage input:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
+.stage{position:relative;aspect-ratio:2000/934;max-width:100%;border-radius:10px;overflow:hidden;background:#cfc6b3;direction:ltr;user-select:none;touch-action:pan-y}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.stage .before{clip-path:inset(0 calc(100% - var(--pos,50%)) 0 0)}
+.handle{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.4);pointer-events:none}
+.handle::after{content:"⟷";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;
+  background:#fff;color:#2a3324;display:grid;place-items:center;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.tag{position:absolute;top:10px;font-size:.8rem;font-weight:600;padding:2px 10px;border-radius:6px;background:rgba(20,24,18,.72);color:#fff;pointer-events:none}
+.tag.l{left:10px}.tag.r{right:10px}
+.stage input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.stage[data-mode="before"] .before{clip-path:none}
+.stage[data-mode="after"] .before{clip-path:inset(0 100% 0 0)}
+.stage:not([data-mode="split"]) .handle,.stage:not([data-mode="split"]) input,.stage:not([data-mode="split"]) .tag{display:none}
+.hint{font-size:.85rem;color:var(--muted);margin:0}
+
+/* changes */
+.changes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:14px}
+.chg{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.chg b{display:block;font-family:var(--display);font-weight:500;margin-bottom:2px}
+.chg p{margin:0;color:var(--muted);font-size:.93rem}
+
+/* plants table */
+.tbl{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.93rem}
+th,td{text-align:start;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:.8rem;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.fr{color:var(--muted);font-size:.85rem;direction:ltr;unicode-bidi:isolate}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:8px;vertical-align:middle}
+.pill{display:inline-block;font-size:.78rem;font-weight:600;padding:1px 9px;border-radius:999px;border:1px solid currentColor}
+.sun{color:var(--terra)} .half{color:var(--olive)}
+
+/* steps */
+ol.steps{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:0;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:40px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+ol.steps li::before{content:counter(s);font-family:var(--display);font-weight:700;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--olive);color:var(--bg);font-size:.95rem}
+ol.steps b{font-family:var(--display);font-weight:500}
+ol.steps p{margin:0;color:var(--muted);font-size:.93rem}
+.note{background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--olive);border-radius:8px;padding:14px 16px;margin-top:16px;font-size:.93rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap" dir="rtl">
+  <header>
+    <span class="eyebrow">تصميم جديد للجنينة · على نفس الصورة الحقيقية</span>
+    <h1>حديقتي الجديدة</h1>
+    <p class="lede">نفس المكان ونفس الزاوية تاع الصورة. حرّك الخط باش تقارن بين الحالة الحقيقية دروك والتصميم الجديد.</p>
+  </header>
+
+  <section class="compare" aria-label="مقارنة قبل وبعد">
+    <div class="tabs" role="group" aria-label="طريقة العرض">
+      <button type="button" id="m-split" data-mode="split" aria-pressed="true">مقارنة</button>
+      <button type="button" id="m-before" data-mode="before" aria-pressed="false">قبل (الصورة الحقيقية)</button>
+      <button type="button" id="m-after" data-mode="after" aria-pressed="false">بعد (التصميم)</button>
+    </div>
+    <div class="stage" id="stage" data-mode="split" style="--pos:50%">
+      <img src="after.jpg" alt="التصميم الجديد للحديقة: حيط ملبّس، حوض بحافة حجرية، نباتات، وقرافي مع حجر للمشي">
+      <img class="before" src="before.jpg" alt="الصورة الحقيقية للحديقة قبل التعديل">
+      <div class="handle"></div>
+      <span class="tag l">قبل</span><span class="tag r">بعد</span>
+      <input type="range" id="pos" min="0" max="100" value="50" aria-label="خط المقارنة">
+    </div>
+    <p class="hint">التصميم مرسوم فوق صورتك، ماشي صورة فوتو حقيقية. الهدف يوريك وين يروح كل حاجة وكيفاش تجي الجنينة.</p>
+  </section>
+
+  <section>
+    <h2>واش تبدّل</h2>
+    <div class="changes">
+      <div class="chg"><b>الحيط</b><p>تلبيس (enduit) ودهن بلون الرمل، مع شريط قرميدي فوق وزوج فنارات.</p></div>
+      <div class="chg"><b>الحوض</b><p>نحّينا البلوكات المكسّرين ودرنا حافة حجرية مستقيمة، والتراب مغطّى بقشور الخشب (paillis).</p></div>
+      <div class="chg"><b>الأرض</b><p>قرافي ناعم بلون فاتح فوق الأرضية، وحجر كبير للمشي يوصّل للباب.</p></div>
+      <div class="chg"><b>البيت الصغير</b><p>الحيط ملبّس كيما الحيط الكبير، والباب الحديد مدهون بالأخضر الزيتوني.</p></div>
+      <div class="chg"><b>جيهة الخردة</b><p>بلاصة الخردة ولات صندوق خشب طويل فيه إكليل الجبل والخزامى، وفوقه بوغنفيليا.</p></div>
+      <div class="chg"><b>الوردة</b><p>الوردة لي كاينة تبقى، نزيدولها أسلاك على الحيط باش تطلع وتكبر.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>النباتات</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>النبتة</th><th>وين</th><th>الشمس</th><th>السقي</th></tr></thead>
+        <tbody>
+          <tr><td><span class="dot" style="background:#9aa985"></span>زيتونة <span class="fr">Olivier</span></td><td>وسط الحوض، وواحدة صغيرة في قصرية قدّام الباب</td><td><span class="pill sun">شمس</span></td><td>قليل، مرة في الجمعة في الصيف</td></tr>
+          <tr><td><span class="dot" style="background:#e46f8f"></span>وردة متسلقة <span class="fr">Rosier grimpant</span></td><td>الوردة لي عندك، على الأسلاك</td><td><span class="pill sun">شمس</span></td><td>متوسط</td></tr>
+          <tr><td><span class="dot" style="background:#7a5fb0"></span>خزامى <span class="fr">Lavande</span></td><td>الحوض والصندوق الخشب</td><td><span class="pill sun">شمس</span></td><td>قليل بزاف</td></tr>
+          <tr><td><span class="dot" style="background:#6e8a5f"></span>إكليل الجبل <span class="fr">Romarin</span></td><td>الصندوق الخشب (سياج قصير)</td><td><span class="pill sun">شمس</span></td><td>قليل بزاف</td></tr>
+          <tr><td><span class="dot" style="background:#5f79d4"></span>أغابانثوس <span class="fr">Agapanthe</span></td><td>الحوض، بين الخزامى</td><td><span class="pill half">شمس / ظل خفيف</span></td><td>متوسط</td></tr>
+          <tr><td><span class="dot" style="background:#3c6a31"></span>ياسمين <span class="fr">Jasmin</span></td><td>على الحيط في الطرف اليمين</td><td><span class="pill half">شمس / ظل خفيف</span></td><td>متوسط</td></tr>
+          <tr><td><span class="dot" style="background:#c2338a"></span>بوغنفيليا <span class="fr">Bougainvillier</span></td><td>على قرنة البيت الصغير</td><td><span class="pill sun">شمس</span></td><td>قليل</td></tr>
+          <tr><td><span class="dot" style="background:#5f8a43"></span>بوكسوس كورة <span class="fr">Buis boule</span></td><td>قدّام الحوض</td><td><span class="pill half">شمس / ظل خفيف</span></td><td>متوسط</td></tr>
+          <tr><td><span class="dot" style="background:#e7bb17"></span>ليمونة في قصرية <span class="fr">Citronnier en pot</span></td><td>في القرافي، قدّام الحوض</td><td><span class="pill sun">شمس</span></td><td>منتظم، ما يجفّش</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>خطوات الخدمة</h2>
+    <ol class="steps">
+      <li><div><b>التنظيف</b><p>نحّي الخردة، البلوكات المكسّرين، البيدو والحشيش. قلّب تراب الحوض بالفاس على 30 سم.</p></div></li>
+      <li><div><b>الحيط</b><p>تلبيس الحيط والبيت الصغير، من بعد الدهن. دهن الباب الحديد بدهان الحديد (antirouille).</p></div></li>
+      <li><div><b>حافة الحوض</b><p>حافة حجر أو بوردور بيطون مستقيمة على طول الحوض.</p></div></li>
+      <li><div><b>التراب</b><p>زيد تراب زراعي وسماد (fumier) مخمّر، وخلّط مليح.</p></div></li>
+      <li><div><b>الغرس والسقي</b><p>اغرس من الكبير للصغير: الزيتونة، الياسمين والوردة لور، من بعد الأغابانثوس والخزامى، والبوكسوس قدّام. ركّب السقي قطرة قطرة (goutte à goutte).</p></div></li>
+      <li><div><b>الأرض</b><p>حط بلاستيك ضد الحشيش (géotextile) تحت القرافي، اختار حجر المشي، وحط قشور الخشب فوق تراب الحوض.</p></div></li>
+      <li><div><b>الإضاءة</b><p>فنارات صغار بالطاقة الشمسية على حافة الحوض، وزوج فنارات على الحيط.</p></div></li>
+    </ol>
+    <p class="note">نوفمبر وقت مليح للغرس في الجزائر: الزيتونة، الخزامى، إكليل الجبل والوردة يغرسوا دروك. الأغابانثوس والبوغنفيليا والليمونة خير تغرسهم في الربيع (مارس–أفريل) كي يسخن الجو.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const stage=document.getElementById('stage'), range=document.getElementById('pos');
+  const set=v=>stage.style.setProperty('--pos',v+'%');
+  range.addEventListener('input',()=>set(range.value));
+  document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+    stage.dataset.mode=b.dataset.mode;
+    document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  }));
+})();
+</script>
