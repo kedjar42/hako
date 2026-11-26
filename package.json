@@ -1,0 +1,13 @@
+{
+  "name": "hako",
+  "version": "1.0.0",
+  "description": "A small self-hosted, Notion-style database app: Node.js + SQLite backend with a web UI.",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "license": "MIT"
+}
