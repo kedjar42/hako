@@ -5,7 +5,7 @@ import { join, normalize, extname, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { timingSafeEqual } from "node:crypto";
 import { openStore, HttpError } from "./store.js";
-import { runQuery, aggregate, sampleDb } from "../public/engine.js";
+import { runQuery, aggregate, sampleLibrary, setResolver } from "../public/engine.js";
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css", ".svg": "image/svg+xml", ".json": "application/json" };
@@ -14,10 +14,14 @@ const MAX_BODY = 5 * 1024 * 1024;
 export function createApp({ dbFile = ":memory:", token = "", seed = true } = {}) {
   const store = openStore(dbFile);
   if (seed && store.listDatabases().length === 0) {
-    const s = sampleDb();
-    delete s.example;
-    s.id = "product-tasks";
-    store.createDatabase(s);
+    // Create both linked examples first without relation values, then fill them in,
+    // so each relation points at a database that already exists.
+    const library = sampleLibrary();
+    for (const d of library) store.createDatabase({ ...d, rows: d.rows.map(r => ({ ...r, props: Object.fromEntries(Object.entries(r.props).filter(([k]) => d.schema[k].type !== "relation")) })) });
+    for (const d of library) {
+      const ops = d.rows.flatMap(r => Object.entries(r.props).filter(([k]) => d.schema[k].type === "relation").map(([k, v]) => ({ op: "set_value", row_id: r.id, property_id: k, value: v })));
+      store.applyTransaction(d.id, { user_action: "Link example rows", operations: ops });
+    }
   }
   const listeners = new Set(); // SSE clients
 
@@ -45,6 +49,8 @@ export function createApp({ dbFile = ":memory:", token = "", seed = true } = {})
   // Server-side query of a view (filters, sorts, calculations) with cursor paging.
   function query(dbId, input) {
     const d = mustGet(dbId);
+    const seen = new Map([[d.id, d]]); // relations and rollups read linked databases once per query
+    setResolver(id => { if (!seen.has(id)) seen.set(id, store.getDatabase(id)); return seen.get(id); });
     const base = input.view_id ? d.views.find(v => v.id === input.view_id) : null;
     if (input.view_id && !base) throw new HttpError(404, "View not found");
     const q2 = { filter: [], sort: [], aggregations: {}, ...(base?.query2 || {}) };

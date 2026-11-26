@@ -34,6 +34,12 @@ button{cursor:pointer}
 .brand{font-family:var(--display);font-size:21px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
 .brand svg{flex:none}
 .rail ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rail h2{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 0 2px;padding:0 9px}
+.badge{width:20px;height:20px;border-radius:5px;background:var(--accent);color:var(--surface);font-size:11px;font-weight:600;display:inline-grid;place-items:center;flex:none}
+.rail li button .nm{display:flex;gap:9px;align-items:center;min-width:0}
+.rail li button .nm span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.newdb{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 10px;text-align:left;color:var(--muted);font-size:13px}
+.newdb:hover{color:var(--ink);background:var(--hover)}
 .rail li button{width:100%;text-align:left;border:0;background:none;padding:7px 9px;border-radius:6px;display:flex;justify-content:space-between;gap:8px}
 .rail li button:hover{background:var(--hover)}
 .rail li button[aria-current="true"]{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-weight:500}
@@ -46,7 +52,17 @@ button{cursor:pointer}
 .btn.ghost:hover{background:var(--hover);color:var(--ink)}
 .btn.danger{color:var(--danger)}
 .main{min-width:0}
-.dbhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:10px}
+.dbhead{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px 14px;margin-bottom:10px}
+.dbhead .main{display:grid;gap:4px;min-width:0}
+.linked{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.linked button{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:1px 7px;font-size:12.5px;color:var(--ink)}
+.linked button:hover{background:var(--hover)}
+.dbmeta{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;padding-top:10px}
+.search{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:5px 10px;min-width:0;width:200px;max-width:100%}
+.rowcount{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+.btn.ghost.on{color:var(--accent)}
+.rel{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:0 6px;font-size:12.5px;line-height:20px;background:var(--surface);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filters{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 8px}
 .dbtitle{font-family:var(--display);font-size:clamp(24px,3vw,30px);font-weight:700;letter-spacing:-.015em;border:0;background:none;padding:2px 4px;margin-left:-4px;border-radius:4px;min-width:0;width:auto;max-width:100%}
 .dbtitle:hover{background:var(--hover)}
 .tag-ex{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
@@ -82,7 +98,7 @@ td.num .cell{justify-content:flex-end;font-family:var(--mono);font-size:13px}
 td input.edit,td select.edit{width:100%;border:0;padding:6px 8px;min-height:34px;background:var(--surface);outline:2px solid var(--accent);outline-offset:-2px}
 .titlecell{display:flex;align-items:center}
 .titlecell .cell{flex:1;font-weight:500}
-.open{border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:11px;border-radius:4px;padding:1px 6px;margin-right:6px;opacity:0}
+.open{border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-right:6px;opacity:0}
 tr:hover .open,.open:focus-visible{opacity:1}
 @media (hover:none){.open{opacity:1}}
 .addrow{border:0;background:none;color:var(--muted);padding:7px 8px;width:100%;text-align:left}
@@ -129,8 +145,9 @@ tfoot b{color:var(--ink);font-weight:500;font-family:var(--mono)}
 <div class="app">
   <aside class="rail">
     <div class="brand"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="20" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M1 8h20M8 8v13" stroke="currentColor" stroke-width="2" fill="none"/></svg>Tabula</div>
-    <button class="btn primary" type="button" id="newDb">New database</button>
+    <h2>Databases</h2>
     <ul id="dbList"></ul>
+    <button class="newdb" type="button" id="newDb">+ New database</button>
     <p class="hint" id="storeNote">Saved in this browser.</p>
     <p class="hint">Undo with Ctrl/⌘+Z.</p>
   </aside>
@@ -141,7 +158,7 @@ tfoot b{color:var(--ink);font-weight:500;font-family:var(--mono)}
 <div class="toast" id="toast" hidden></div>
 
 <script type="module">
-import { TYPES, COLORS, OPS, opKind, AGGS, blankDb, titleProp, optOf, valueOf, displayText, fmtNum, fmtDate, isEmpty, runFormula, runQuery, aggregate, aggOptions } from "./engine.js";
+import { TYPES, COLORS, OPS, opKind, AGGS, blankDb, titleProp, optOf, valueOf, displayText, fmtNum, fmtDate, isEmpty, runFormula, runQuery, aggregate, aggOptions, ROLLUP_FNS, setResolver, relatedRows } from "./engine.js";
 (() => {
 "use strict";
 const $ = s => document.querySelector(s);
@@ -164,7 +181,9 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 // ---- State ----
 let dbs = [];
-let curId = null, curViewId = null, peekRowId = null, editing = null;
+let curId = null, curViewId = null, peekRowId = null, editing = null, searchQ = "";
+setResolver(id => dbs.find(d => d.id === id)); // relations and rollups read linked databases from memory
+const dbById = id => dbs.find(d => d.id === id);
 const undoStack = [];
 
 // ---- Server sync: every edit becomes a transaction of small operations ----
@@ -220,23 +239,51 @@ async function reloadOne(id) {
 }
 
 // ---- Transactions with undo (each edit snapshots the database first) ----
+// An edit can touch two databases (a two-way relation), so the snapshot covers all of them
+// and each database that changed gets its own transaction.
 function commit(label, fn) {
   const db = cur(); if (!db) return;
-  const snapshot = JSON.stringify(db);
+  const snapshot = JSON.stringify(dbs);
   undoStack.push({ dbId: db.id, label, snapshot });
   if (undoStack.length > 100) undoStack.shift();
   fn(db);
-  push(JSON.parse(snapshot), db, label); render();
+  syncRelations(db);
+  for (const before of JSON.parse(snapshot)) { const after = dbById(before.id); if (after) push(before, after, label); }
+  render();
 }
 function undo() {
   const u = undoStack.pop(); if (!u) return;
-  const i = dbs.findIndex(d => d.id === u.dbId); if (i < 0) return;
-  const before = dbs[i], restored = JSON.parse(u.snapshot);
-  restored.version = before.version;
-  dbs[i] = restored; curId = u.dbId;
-  if (!dbs[i].views.some(v => v.id === curViewId)) curViewId = dbs[i].views[0].id;
-  push(before, restored, "Undo: " + u.label); render(); toast("Undid: " + u.label);
+  const saved = JSON.parse(u.snapshot);
+  if (!Array.isArray(saved)) { restoreDeleted(saved); return; }
+  for (const restored of saved) {
+    const i = dbs.findIndex(d => d.id === restored.id); if (i < 0) continue;
+    const before = dbs[i]; restored.version = before.version; dbs[i] = restored;
+    push(before, restored, "Undo: " + u.label);
+  }
+  curId = u.dbId; const d = cur();
+  if (d && !d.views.some(v => v.id === curViewId)) curViewId = d.views[0].id;
+  render(); toast("Undid: " + u.label);
 }
+function restoreDeleted(d) {
+  dbs.push(d); curId = d.id; curViewId = d.views[0].id; render();
+  api("POST", "/databases", d).then(() => reloadOne(d.id)).catch(e => toast("Couldn't restore: " + e.message));
+}
+// Keep two-way relations in step: the other side lists exactly the rows that point at it.
+function syncRelations(db) {
+  for (const [key, p] of Object.entries(db.schema)) {
+    if (p.type !== "relation" || !p.synced_property_id) continue;
+    const other = dbById(p.database_id), sk = p.synced_property_id;
+    if (!other || !other.schema[sk] || (other === db && sk === key)) continue;
+    for (const tr of other.rows) {
+      const want = db.rows.filter(r => (r.props[key] || []).includes(tr.id)).map(r => r.id);
+      const curIds = tr.props[sk] || [];
+      const next = [...curIds.filter(id => want.includes(id)), ...want.filter(id => !curIds.includes(id))];
+      if (!same(curIds, next)) tr.props[sk] = next;
+    }
+  }
+}
+const uniqueName = (db, base) => { let n = base, i = 2; while (Object.values(db.schema).some(x => x.name === n)) n = base + " " + i++; return n; };
+const shortName = d => (d?.name || "Untitled database").replace(/\s*\(example\)$/, "");
 document.addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.shiftKey && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) { e.preventDefault(); undo(); }
   if (e.key === "Escape") { if (!$("#pop").hidden) closePop(); else if (peekRowId) { peekRowId = null; renderPeek(); } }
@@ -274,12 +321,43 @@ function cellContent(db, key, row) {
   if (p.type === "checkbox") return [h("input", { type: "checkbox", class: "check", checked: v, "aria-label": p.name, onclick: e => { e.stopPropagation(); commit("Toggle " + p.name, () => { row.props[key] = e.target.checked; }); } })];
   if (p.type === "url" && v) return [h("a", { class: "url", href: /^https?:\/\//.test(v) ? v : "https://" + v, target: "_blank", rel: "noopener", onclick: e => e.stopPropagation(), text: v })];
   if (p.type === "formula" && v && v.error) return [h("span", { class: "muted", title: v.error, text: "Error" })];
+  if (p.type === "relation") return relatedRows(db, key, row).map(r => h("span", { class: "rel", text: r.title }));
   return [h("span", { text: displayText(db, key, row) })];
 }
-const readOnly = t => t === "formula" || t === "created_time" || t === "checkbox";
+const readOnly = t => t === "formula" || t === "created_time" || t === "checkbox" || t === "rollup";
+// Pick linked rows from the other database; typing a new name creates that row there.
+function relationPicker(db, key, row, anchor) {
+  const p = db.schema[key], target = dbById(p.database_id);
+  openPop(anchor, pop => {
+    if (!target) { pop.append(h("p", { class: "hint", style: "padding:6px", text: "The linked database was deleted." })); return; }
+    const tKey = titleProp(target);
+    const q = h("input", { type: "text", placeholder: "Link or create a row in " + shortName(target), "aria-label": "Search " + target.name, style: "width:100%" });
+    const list = h("div");
+    const draw = () => {
+      list.replaceChildren();
+      const s = q.value.trim().toLowerCase(), sel = row.props[key] || [];
+      const matches = target.rows.filter(r => String(r.props[tKey] || "").toLowerCase().includes(s));
+      matches.sort((a, b) => sel.includes(b.id) - sel.includes(a.id));
+      for (const r of matches.slice(0, 50)) list.append(h("button", { class: "item", type: "button", onclick: () => {
+        commit((sel.includes(r.id) ? "Unlink " : "Link ") + p.name, () => { const cur = row.props[key] || []; row.props[key] = cur.includes(r.id) ? cur.filter(x => x !== r.id) : [...cur, r.id]; });
+        relationPicker(cur(), key, findRow(row.id), document.querySelector(`[data-cell="${row.id}:${key}"]`) || anchor);
+      } }, h("span", { class: "ic", text: sel.includes(r.id) ? "✓" : "" }), h("span", { class: "rel", text: r.props[tKey] || "Untitled" })));
+      if (!matches.length && !s) list.append(h("p", { class: "hint", style: "padding:6px", text: shortName(target) + " has no rows yet." }));
+      if (s && !target.rows.some(r => String(r.props[tKey] || "").toLowerCase() === s)) list.append(item("Create “" + q.value.trim() + "” in " + shortName(target), () => {
+        const nr = { id: uid(), created: Date.now(), body: "", props: { [tKey]: q.value.trim() } };
+        commit("Create and link row", () => { target.rows.push(nr); row.props[key] = [...(row.props[key] || []), nr.id]; });
+        relationPicker(cur(), key, findRow(row.id), document.querySelector(`[data-cell="${row.id}:${key}"]`) || anchor);
+      }, "+"));
+    };
+    q.addEventListener("input", draw);
+    q.addEventListener("keydown", e => { if (e.key === "Enter") list.querySelector("button")?.click(); });
+    pop.append(h("div", { class: "row" }, q), list); draw();
+  });
+}
 function startEdit(db, key, row, container, onDone) {
   const p = db.schema[key]; if (readOnly(p.type)) return;
   if (p.type === "select" || p.type === "status" || p.type === "multi_select") { optionPicker(db, key, row, container); return; }
+  if (p.type === "relation") { relationPicker(db, key, row, container); return; }
   const inp = h("input", { class: "edit", type: p.type === "number" ? "number" : p.type === "date" ? "date" : p.type === "email" ? "email" : p.type === "url" ? "url" : "text", value: row.props[key] ?? "", "aria-label": p.name });
   let done = false;
   const finish = keep => { if (done) return; done = true; const nv = p.type === "number" ? (inp.value === "" ? null : Number(inp.value)) : inp.value; if (keep && nv !== (row.props[key] ?? (p.type === "number" ? null : ""))) commit("Edit " + p.name, () => { row.props[key] = nv; }); else onDone(); };
@@ -323,7 +401,7 @@ function propMenu(db, key, anchor) {
     name.addEventListener("change", () => { const v = name.value.trim(); if (v && v !== p.name && !Object.values(db.schema).some(x => x.name === v)) commit("Rename property", () => { p.name = v; }); });
     pop.append(h("label", {}, "Name", name));
     if (p.type !== "title") {
-      const type = h("select", { "aria-label": "Property type" }, Object.entries(TYPES).filter(([t]) => t !== "title").map(([t, d]) => h("option", { value: t, text: d.label })));
+      const type = h("select", { "aria-label": "Property type" }, Object.entries(TYPES).filter(([t]) => t !== "title" && ((t !== "relation" && t !== "rollup") || t === p.type)).map(([t, d]) => h("option", { value: t, text: d.label })));
       type.value = p.type;
       type.addEventListener("change", () => commit("Change type", () => convertType(db, key, type.value)));
       pop.append(h("label", {}, "Type", type));
@@ -335,6 +413,32 @@ function propMenu(db, key, anchor) {
       ex.addEventListener("input", test);
       ex.addEventListener("change", () => commit("Edit formula", () => { p.expression = ex.value; }));
       pop.append(h("label", {}, "Formula", ex, msg, h("span", { class: "hint", text: 'Example: prop("Estimate (h)") * 85, or if(prop("Reviewed"), "OK", "Check")' })));
+    }
+    if (p.type === "relation") {
+      const target = dbById(p.database_id);
+      pop.append(h("div", { class: "row", style: "align-items:center;flex-wrap:wrap" }, h("span", { class: "hint", text: target ? "Links to" : "The linked database was deleted." }),
+        target ? h("button", { class: "btn", type: "button", onclick: () => { closePop(); openDb(target.id); }, text: target.name }) : null),
+        target && p.synced_property_id && target.schema[p.synced_property_id] ? h("p", { class: "hint", style: "padding:0 6px;margin:0", text: "Shown in " + target.name + " as “" + target.schema[p.synced_property_id].name + "”." }) : null);
+    }
+    if (p.type === "rollup") {
+      const rels = Object.entries(db.schema).filter(([, x]) => x.type === "relation");
+      if (!rels.length) pop.append(h("p", { class: "hint", style: "padding:0 6px", text: "Add a Relation property first. A rollup summarizes a property of the linked rows." }));
+      else {
+        const relSel = h("select", { "aria-label": "Relation" }, rels.map(([k, x]) => h("option", { value: k, text: x.name })));
+        relSel.value = p.relation_property || "";
+        relSel.addEventListener("change", () => commit("Change rollup", () => { p.relation_property = relSel.value; p.target_property = titleProp(dbById(db.schema[relSel.value].database_id) || { schema: {} }) || ""; }));
+        pop.append(h("label", {}, "Relation", relSel));
+        const target = dbById(db.schema[p.relation_property]?.database_id);
+        if (target) {
+          const propSel = h("select", { "aria-label": "Property" }, Object.entries(target.schema).map(([k, x]) => h("option", { value: k, text: x.name })));
+          propSel.value = p.target_property || "";
+          propSel.addEventListener("change", () => commit("Change rollup", () => { p.target_property = propSel.value; }));
+          const fnSel = h("select", { "aria-label": "Calculate" }, ROLLUP_FNS.map(([v, l]) => h("option", { value: v, text: l })));
+          fnSel.value = p.function || "count";
+          fnSel.addEventListener("change", () => commit("Change rollup", () => { p.function = fnSel.value; }));
+          pop.append(h("label", {}, "Property in " + shortName(target), propSel), h("label", {}, "Calculate", fnSel));
+        }
+      }
     }
     if (p.options) {
       pop.append(h("div", { class: "sep" }), h("div", { class: "hint", style: "padding:2px 6px", text: "Options" }));
@@ -351,13 +455,28 @@ function propMenu(db, key, anchor) {
     if (opKind(p.type)) pop.append(item("Filter", () => { closePop(); addFilter(db, view, key); }, "⏷"));
     if (view.type === "table" && p.type !== "title") pop.append(item("Hide in this view", () => { commit("Hide property", () => { const tp = view.format.table_properties.find(x => x.property === key); if (tp) tp.visible = false; }); closePop(); }, "◌"));
     if (p.type !== "title") pop.append(item("Delete property", () => {
-      commit("Delete property", () => { delete db.schema[key]; for (const r of db.rows) delete r.props[key]; for (const v of db.views) { if (v.format.table_properties) v.format.table_properties = v.format.table_properties.filter(x => x.property !== key); v.query2.filter = v.query2.filter.filter(f => f.property !== key); v.query2.sort = v.query2.sort.filter(s => s.property !== key); delete v.query2.aggregations[key]; if (v.format.board_columns_by === key) v.format.board_columns_by = null; } });
+      commit("Delete property", () => removeProp(db, key));
       closePop(); toast("Deleted property", { label: "Undo", fn: undo });
     }, "🗑"));
   });
 }
+// Remove a property everywhere it is used; a two-way relation also removes its other side.
+function removeProp(d, key) {
+  const p = d.schema[key]; if (!p) return;
+  delete d.schema[key];
+  for (const r of d.rows) delete r.props[key];
+  for (const v of d.views) {
+    for (const f of ["table_properties"]) if (v.format[f]) v.format[f] = v.format[f].filter(x => x.property !== key);
+    for (const f of ["card_properties", "list_properties"]) if (v.format[f]) v.format[f] = v.format[f].filter(x => x !== key);
+    v.query2.filter = v.query2.filter.filter(f => f.property !== key); v.query2.sort = v.query2.sort.filter(s => s.property !== key); delete v.query2.aggregations[key];
+    if (v.format.board_columns_by === key) v.format.board_columns_by = null;
+  }
+  if (p.type === "relation" && p.synced_property_id) { const other = dbById(p.database_id); if (other?.schema[p.synced_property_id]?.synced_property_id === key) removeProp(other, p.synced_property_id); }
+}
 function convertType(db, key, type) {
   const p = db.schema[key], old = p.type;
+  if (old === "relation" && p.synced_property_id) { const other = dbById(p.database_id); if (other) removeProp(other, p.synced_property_id); }
+  if (old === "relation" || old === "rollup") { for (const k of ["database_id", "synced_property_id", "relation_property", "target_property", "function"]) delete p[k]; }
   const texts = db.rows.map(r => displayText(db, key, r));
   p.type = type;
   if (["select", "status", "multi_select"].includes(type)) {
@@ -380,14 +499,38 @@ function addProperty(db, view, anchor) {
   openPop(anchor, pop => {
     pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "New property" }));
     for (const [t, d] of Object.entries(TYPES)) if (t !== "title") pop.append(item(d.label, () => {
-      const key = "p_" + uid(); let n = d.label, i = 2; while (Object.values(db.schema).some(x => x.name === n)) n = d.label + " " + i++;
+      if (t === "relation") { relationTargetPicker(db, anchor); return; }
+      const key = "p_" + uid(), n = uniqueName(db, d.label);
+      const firstRel = Object.keys(db.schema).find(k => db.schema[k].type === "relation");
       commit("Add property", () => {
-        db.schema[key] = { name: n, type: t, ...(["select", "status", "multi_select"].includes(t) ? { options: t === "status" ? [{ id: uid(), value: "Not started", color: "gray" }, { id: uid(), value: "In progress", color: "blue" }, { id: uid(), value: "Done", color: "green" }] : [] } : {}), ...(t === "formula" ? { expression: "" } : {}) };
+        db.schema[key] = { name: n, type: t, ...(["select", "status", "multi_select"].includes(t) ? { options: t === "status" ? [{ id: uid(), value: "Not started", color: "gray" }, { id: uid(), value: "In progress", color: "blue" }, { id: uid(), value: "Done", color: "green" }] : [] } : {}), ...(t === "formula" ? { expression: "" } : {}),
+          ...(t === "rollup" ? { relation_property: firstRel || "", target_property: firstRel ? titleProp(dbById(db.schema[firstRel].database_id) || { schema: {} }) || "" : "", function: "count" } : {}) };
         for (const v of db.views) if (v.format.table_properties) v.format.table_properties.push({ property: key, visible: true, width: 150 });
       });
       closePop();
       setTimeout(() => { const btn = document.querySelector(`[data-prop="${key}"]`); if (btn) propMenu(cur(), key, btn); }, 0);
     }, d.ic));
+  });
+}
+
+// A relation links this database to another (or to itself). Between two databases it is two-way:
+// each side gets a property, and linking a row on one side shows up on the other.
+function relationTargetPicker(db, anchor) {
+  openPop(anchor, pop => {
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Link to which database?" }));
+    for (const t of dbs) pop.append(item(t === db ? t.name + " (this database)" : t.name, () => {
+      const key = "p_" + uid(), sk = "p_" + uid(), two = t !== db;
+      commit("Add relation", () => {
+        db.schema[key] = { name: uniqueName(db, shortName(t)), type: "relation", database_id: t.id, ...(two ? { synced_property_id: sk } : {}) };
+        for (const v of db.views) if (v.format.table_properties) v.format.table_properties.push({ property: key, visible: true, width: 200 });
+        if (two) {
+          t.schema[sk] = { name: uniqueName(t, shortName(db)), type: "relation", database_id: db.id, synced_property_id: key };
+          for (const v of t.views) if (v.format.table_properties) v.format.table_properties.push({ property: sk, visible: true, width: 200 });
+        }
+      });
+      closePop();
+      setTimeout(() => { const btn = document.querySelector(`[data-prop="${key}"]`); if (btn) propMenu(cur(), key, btn); }, 0);
+    }, "⇄"));
   });
 }
 
@@ -404,7 +547,8 @@ function filterChip(db, view, f, i) {
   let valEl = null; const needsVal = !["is_empty", "is_not_empty", "checked", "unchecked"].includes(f.op);
   if (needsVal) {
     const k = opKind(p.type);
-    if (k === "select" || k === "multi_select") { valEl = h("select", { "aria-label": "Filter value" }, h("option", { value: "", text: "Any" }), p.options.map(o => h("option", { value: o.id, text: o.value }))); valEl.value = f.value; valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
+    if (k === "relation") { const target = dbById(p.database_id), tk = target && titleProp(target); valEl = h("select", { "aria-label": "Filter value" }, h("option", { value: "", text: "Any" }), (target?.rows || []).map(r => h("option", { value: r.id, text: r.props[tk] || "Untitled" }))); valEl.value = f.value; valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
+    else if (k === "select" || k === "multi_select") { valEl = h("select", { "aria-label": "Filter value" }, h("option", { value: "", text: "Any" }), p.options.map(o => h("option", { value: o.id, text: o.value }))); valEl.value = f.value; valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
     else { valEl = h("input", { type: k === "number" ? "number" : k === "date" ? "date" : "text", value: f.value, placeholder: "Value", "aria-label": "Filter value" }); valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
   }
   return h("span", { class: "chip" }, h("span", { text: p.name }), opSel, valEl, h("button", { class: "x", type: "button", "aria-label": "Remove filter", onclick: () => commit("Remove filter", () => { view.query2.filter.splice(i, 1); }), text: "×" }));
@@ -425,7 +569,7 @@ function pickProp(db, anchor, filterFn, onPick, heading) {
 // ---- Rows ----
 function addRow(db, view, preset = {}) {
   const r = { id: uid(), created: Date.now(), body: "", props: {} };
-  for (const f of view.query2.filter) { const p = db.schema[f.property]; if (!p) continue; if (f.op === "is" && (p.type === "select" || p.type === "status") && f.value) r.props[f.property] = f.value; if (f.op === "contains" && p.type === "multi_select" && f.value) r.props[f.property] = [f.value]; if (f.op === "checked") r.props[f.property] = true; }
+  for (const f of view.query2.filter) { const p = db.schema[f.property]; if (!p) continue; if (f.op === "is" && (p.type === "select" || p.type === "status") && f.value) r.props[f.property] = f.value; if (f.op === "contains" && (p.type === "multi_select" || p.type === "relation") && f.value) r.props[f.property] = [f.value]; if (f.op === "checked") r.props[f.property] = true; }
   Object.assign(r.props, preset);
   commit("Add row", () => { db.rows.push(r); });
   return r;
@@ -445,8 +589,8 @@ function renderTable(db, view, rows) {
   const body = rows.map(row => h("tr", {}, tp.map(x => {
     const key = x.property, p = db.schema[key];
     const cell = h("button", { class: "cell", type: "button", "data-cell": row.id + ":" + key, "aria-label": p.name + ": " + (displayText(db, key, row) || "empty"), onclick: e => { if (readOnly(p.type)) return; const td = e.currentTarget.parentElement; if (p.options) optionPicker(db, key, row, e.currentTarget); else startEdit(db, key, row, key === tKey ? td.querySelector(".titlecell") || td : td, () => render()); } }, cellContent(db, key, row));
-    if (key === tKey) return h("td", {}, h("div", { class: "titlecell" }, cell, h("button", { class: "open", type: "button", onclick: () => { peekRowId = row.id; renderPeek(); }, text: "Open" })));
-    return h("td", { class: p.type === "number" || p.type === "formula" ? "num" : "" }, cell);
+    if (key === tKey) return h("td", {}, h("div", { class: "titlecell" }, cell, h("button", { class: "open", type: "button", onclick: () => { peekRowId = row.id; renderPeek(); }, "aria-label": "Open " + (displayText(db, tKey, row) || "row"), text: "Open" })));
+    return h("td", { class: ["number", "formula", "rollup"].includes(p.type) ? "num" : "" }, cell);
   }), h("td", {})));
   const foot = h("tr", {}, tp.map(x => {
     const p = db.schema[x.property], a = view.query2.aggregations[x.property] || "none";
@@ -509,7 +653,7 @@ function renderPeek() {
   for (const [k, p] of Object.entries(db.schema)) {
     if (k === tKey) continue;
     const v = h("div", { class: "v" });
-    const cell = h("button", { class: "cell", type: "button", "data-cell": row.id + ":" + k, onclick: e => { if (readOnly(p.type)) return; if (p.options) optionPicker(db, k, row, e.currentTarget); else startEdit(db, k, row, v, () => renderPeek()); } }, cellContent(db, k, row));
+    const cell = h("button", { class: "cell", type: "button", "data-cell": row.id + ":" + k, onclick: e => { if (readOnly(p.type)) return; if (p.options) optionPicker(db, k, row, e.currentTarget); else if (p.type === "relation") relationPicker(db, k, row, e.currentTarget); else startEdit(db, k, row, v, () => renderPeek()); } }, cellContent(db, k, row));
     if (isEmpty(valueOf(db, k, row)) && !readOnly(p.type)) cell.append(h("span", { class: "muted", text: "Empty" }));
     v.append(cell);
     grid.append(h("div", { class: "k" }, h("span", { class: "ic", text: TYPES[p.type].ic }), p.name), v);
@@ -524,8 +668,10 @@ function renderPeek() {
 // ---- Main render ----
 function renderRail() {
   const ul = $("#dbList"); ul.replaceChildren();
-  for (const d of dbs) ul.append(h("li", {}, h("button", { type: "button", "aria-current": d.id === curId ? "true" : "false", onclick: () => { curId = d.id; curViewId = d.views[0].id; peekRowId = null; render(); } }, h("span", { style: "overflow:hidden;text-overflow:ellipsis;white-space:nowrap", text: d.name || "Untitled database" }), h("small", { text: String(d.rows.length) }))));
+  for (const d of dbs) ul.append(h("li", {}, h("button", { type: "button", "aria-current": d.id === curId ? "true" : "false", onclick: () => openDb(d.id) },
+    h("span", { class: "nm" }, h("span", { class: "badge", "aria-hidden": "true", text: (shortName(d).trim()[0] || "U").toUpperCase() }), h("span", { text: d.name || "Untitled database" })))));
 }
+function openDb(id) { const d = dbById(id); if (!d) return; curId = d.id; curViewId = d.views[0].id; peekRowId = null; searchQ = ""; render(); }
 function render() {
   renderRail();
   const m = $("#main"); m.replaceChildren();
@@ -533,7 +679,12 @@ function render() {
   const view = curView(); curViewId = view.id;
   const name = h("input", { class: "dbtitle", value: db.name, "aria-label": "Database name", size: String(Math.max(8, db.name.length + 1)) });
   name.addEventListener("change", () => commit("Rename database", () => { db.name = name.value.trim() || "Untitled database"; }));
-  m.append(h("div", { class: "dbhead" }, name, h("span", { class: "hint", text: db.rows.length + " rows" })));
+  const linked = [...new Set(Object.values(db.schema).filter(p => p.type === "relation" && p.database_id !== db.id).map(p => p.database_id))].map(dbById).filter(Boolean);
+  const propCount = Object.keys(db.schema).length;
+  m.append(h("div", { class: "dbhead" },
+    h("div", { class: "main" }, name, linked.length ? h("div", { class: "linked" }, "Linked to", linked.map(t => h("button", { type: "button", onclick: () => openDb(t.id), text: t.name }))) : null),
+    h("div", { class: "dbmeta" }, h("span", { text: `${db.rows.length} ${db.rows.length === 1 ? "row" : "rows"} · ${propCount} ${propCount === 1 ? "property" : "properties"}` }),
+      h("button", { class: "btn ghost", type: "button", "aria-label": "Database and view options", onclick: e => viewMenu(db, view, e.currentTarget), text: "•••" }))));
 
   const vt = { table: "▦", board: "▥", list: "☰" };
   m.append(h("div", { class: "views", role: "tablist" }, db.views.map(v => h("button", { type: "button", role: "tab", "aria-selected": v.id === view.id ? "true" : "false", onclick: () => { curViewId = v.id; render(); }, ondblclick: e => viewMenu(db, v, e.currentTarget) }, h("span", { class: "ic", text: vt[v.type] }), v.name)),
@@ -544,21 +695,61 @@ function render() {
       commit("Add view", () => { db.views.push(nv); }); curViewId = nv.id; closePop(); render();
     }, vt[t])); }), text: "+" })));
 
-  const rows = runQuery(db, view);
-  const tb = h("div", { class: "toolbar" },
-    view.query2.filter.map((f, i) => filterChip(db, view, f, i)),
-    view.query2.sort.map((s, i) => sortChip(db, view, s, i)),
-    h("span", { class: "sp" }),
-    h("button", { class: "btn ghost", type: "button", onclick: e => pickProp(db, e.currentTarget, p => !!opKind(p.type), k => addFilter(db, view, k), "Filter by"), text: "Filter" }),
-    h("button", { class: "btn ghost", type: "button", onclick: e => pickProp(db, e.currentTarget, () => true, k => commit("Add sort", () => { view.query2.sort.push({ property: k, direction: "ascending" }); }), "Sort by"), text: "Sort" }),
+  const nf = view.query2.filter.length, ns = view.query2.sort.length;
+  const search = h("input", { class: "search", id: "searchTitles", type: "search", placeholder: "Search titles", "aria-label": "Search titles", value: searchQ });
+  const count = h("span", { class: "rowcount", id: "rowCount" });
+  search.addEventListener("input", () => { searchQ = search.value; renderArea(); });
+  const tb = h("div", { class: "toolbar" }, search, count, h("span", { class: "sp" }),
+    h("button", { class: "btn ghost" + (nf ? " on" : ""), type: "button", onclick: e => pickProp(db, e.currentTarget, p => !!opKind(p.type), k => addFilter(db, view, k), "Filter by"), text: nf ? "Filter · " + nf : "Filter" }),
+    h("button", { class: "btn ghost" + (ns ? " on" : ""), type: "button", id: "sortBtn", onclick: e => sortMenu(db, view, e.currentTarget), text: ns ? "Sort · " + ns : "Sort" }),
     view.type === "board" ? h("button", { class: "btn ghost", type: "button", onclick: e => pickProp(db, e.currentTarget, p => p.type === "select" || p.type === "status", k => commit("Group board", () => { view.format.board_columns_by = k; }), "Group by"), text: "Group" }) : null,
-    h("button", { class: "btn ghost", type: "button", onclick: e => viewMenu(db, view, e.currentTarget), text: "View options" }),
-    h("button", { class: "btn primary", type: "button", onclick: () => { const r = addRow(db, view); peekRowId = r.id; renderPeek(); }, text: "New" }));
+    h("button", { class: "btn ghost", type: "button", id: "propsBtn", onclick: e => propertiesMenu(db, view, e.currentTarget), text: "Properties" }),
+    h("button", { class: "btn primary", type: "button", onclick: () => { const r = addRow(db, view); peekRowId = r.id; renderPeek(); }, text: "+ New" }));
   m.append(tb);
-  if (view.query2.filter.length && rows.length !== db.rows.length) m.append(h("p", { class: "hint", style: "margin:0 0 6px", text: `Showing ${rows.length} of ${db.rows.length} rows` }));
-  m.append(view.type === "board" ? renderBoard(db, view, rows) : view.type === "list" ? renderList(db, view, rows) : renderTable(db, view, rows));
-  if (!db.rows.length) m.append(h("p", { class: "empty", text: "No rows yet. Use New to add the first one." }));
+  if (nf) m.append(h("div", { class: "filters" }, view.query2.filter.map((f, i) => filterChip(db, view, f, i))));
+  m.append(h("div", { id: "viewArea" }));
+  renderArea();
   renderPeek();
+}
+// The table/board/list area, redrawn on its own while typing in the search box.
+function renderArea() {
+  const db = cur(), view = curView(), area = $("#viewArea"); if (!db || !area) return;
+  const tKey = titleProp(db), q = searchQ.trim().toLowerCase();
+  let rows = runQuery(db, view);
+  if (q) rows = rows.filter(r => String(r.props[tKey] || "").toLowerCase().includes(q));
+  const c = $("#rowCount"); if (c) c.textContent = rows.length === db.rows.length ? `${rows.length} ${rows.length === 1 ? "row" : "rows"}` : `${rows.length} of ${db.rows.length} rows`;
+  area.replaceChildren(view.type === "board" ? renderBoard(db, view, rows) : view.type === "list" ? renderList(db, view, rows) : renderTable(db, view, rows));
+  if (!db.rows.length) area.append(h("p", { class: "empty", text: "No rows yet. Use + New to add the first one." }));
+  else if (!rows.length) area.append(h("p", { class: "empty", text: q ? "No titles match “" + searchQ.trim() + "”." : "No rows match these filters." }));
+}
+function sortMenu(db, view, anchor) {
+  openPop(anchor, pop => {
+    view.query2.sort.forEach((s, i) => { const c = sortChip(db, view, s, i); if (c) pop.append(h("div", { class: "row" }, c)); });
+    if (view.query2.sort.length) pop.append(h("div", { class: "sep" }));
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Add a sort" }));
+    for (const [k, p] of Object.entries(db.schema)) if (!view.query2.sort.some(s => s.property === k)) pop.append(item(p.name, () => { commit("Add sort", () => { view.query2.sort.push({ property: k, direction: "ascending" }); }); sortMenu(cur(), curView(), $("#sortBtn") || anchor); }, TYPES[p.type].ic));
+  });
+}
+// Show or hide properties in the current view, or add a new one.
+function propertiesMenu(db, view, anchor) {
+  openPop(anchor, pop => {
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Shown in " + view.name }));
+    const tKey = titleProp(db);
+    for (const [k, p] of Object.entries(db.schema)) {
+      if (k === tKey) continue;
+      let on;
+      if (view.type === "table") { const tp = view.format.table_properties.find(x => x.property === k); on = !!tp && tp.visible; }
+      else on = (view.format[view.type === "board" ? "card_properties" : "list_properties"] || []).includes(k);
+      pop.append(item(p.name, () => {
+        commit((on ? "Hide " : "Show ") + p.name, () => {
+          if (view.type === "table") { const tp = view.format.table_properties.find(x => x.property === k); if (tp) tp.visible = !on; else view.format.table_properties.push({ property: k, visible: true, width: 150 }); }
+          else { const f = view.type === "board" ? "card_properties" : "list_properties"; const arr = view.format[f] || []; view.format[f] = on ? arr.filter(x => x !== k) : [...arr, k]; }
+        });
+        propertiesMenu(cur(), curView(), $("#propsBtn") || anchor);
+      }, on ? "✓" : ""));
+    }
+    pop.append(h("div", { class: "sep" }), item("New property", () => addProperty(db, view, anchor), "+"));
+  });
 }
 function viewMenu(db, view, anchor) {
   openPop(anchor, pop => {
@@ -573,11 +764,11 @@ function viewMenu(db, view, anchor) {
     }
     pop.append(h("div", { class: "sep" }), item("Duplicate view", () => { const c = JSON.parse(JSON.stringify(view)); c.id = uid(); c.name = view.name + " copy"; commit("Duplicate view", () => { db.views.push(c); }); curViewId = c.id; closePop(); render(); }, "⧉"));
     if (db.views.length > 1) pop.append(item("Delete view", () => { commit("Delete view", () => { db.views = db.views.filter(v => v.id !== view.id); }); curViewId = db.views[0].id; closePop(); render(); toast("Deleted view", { label: "Undo", fn: undo }); }, "🗑"));
-    pop.append(item("Delete database", () => { const d = db; dbs = dbs.filter(x => x !== d); api("DELETE", "/databases/" + d.id).catch(e => { toast("Couldn't delete: " + e.message); reloadOne(d.id); }); undoStack.push({ dbId: d.id, label: "Delete database", snapshot: JSON.stringify(d) }); curId = dbs[0]?.id ?? null; curViewId = dbs[0]?.views[0].id ?? null; closePop(); render(); toast("Deleted " + d.name, { label: "Undo", fn: () => { const u = undoStack.pop(); const restored = JSON.parse(u.snapshot); dbs.push(restored); curId = restored.id; curViewId = restored.views[0].id; render(); api("POST", "/databases", restored).then(() => reloadOne(restored.id)).catch(e => toast("Couldn't restore: " + e.message)); } }); }, "✕"));
+    pop.append(item("Delete database", () => { const d = db; dbs = dbs.filter(x => x !== d); api("DELETE", "/databases/" + d.id).catch(e => { toast("Couldn't delete: " + e.message); reloadOne(d.id); }); undoStack.push({ dbId: d.id, label: "Delete database", snapshot: JSON.stringify(d) }); curId = dbs[0]?.id ?? null; curViewId = dbs[0]?.views[0].id ?? null; closePop(); render(); toast("Deleted " + d.name, { label: "Undo", fn: undo }); }, "✕"));
   });
 }
 
-$("#newDb").addEventListener("click", async () => { let d; try { d = await api("POST", "/databases", blankDb()); } catch (e) { toast("Couldn't create a database: " + e.message); return; } dbs.push(d); curId = d.id; curViewId = d.views[0].id; render(); setTimeout(() => $(".dbtitle")?.select(), 0); });
+$("#newDb").addEventListener("click", async () => { let d; try { d = await api("POST", "/databases", blankDb()); } catch (e) { toast("Couldn't create a database: " + e.message); return; } dbs.push(d); openDb(d.id); setTimeout(() => $(".dbtitle")?.select(), 0); });
 
 // ---- Boot ----
 async function boot() {

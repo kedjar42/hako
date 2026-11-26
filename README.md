@@ -6,7 +6,10 @@ A small, self-hosted, Notion-style database app. One Node.js process serves the 
 app and stores everything in a single SQLite file. No dependencies to install.
 
 - Typed properties: title, text, number, select, multi-select, status, date,
-  checkbox, URL, email, formula, created time
+  checkbox, URL, email, formula, created time, relation and rollup
+- Linked databases: a relation links rows across two databases in both directions,
+  and a rollup summarizes the linked rows (count, sum, average, min, max…)
+- Search titles, filter, sort, and choose which properties each view shows
 - Table, board (drag cards between columns) and list views, each with its own
   filters, sorts and column calculations
 - Every edit is saved as a transaction; Ctrl/⌘+Z undoes it
@@ -22,7 +25,8 @@ npm start
 ```
 
 Then open http://127.0.0.1:3000. The first run creates `tabula.db` with an
-example "Product tasks" database.
+two linked examples, "Reading list" and "Authors"
+(each author's average rating and book count are rollups over their books).
 
 Settings are environment variables:
 
@@ -57,7 +61,15 @@ The tables follow the record kinds found in Notion's own client:
 | `transactions` | transaction queue            | Every write, with its operations, for history |
 
 Deleting a property removes its values; deleting a database removes everything
-in it. Formula and created-time values are computed, never stored.
+in it. Formula, rollup and created-time values are computed, never stored.
+
+A relation property stores a list of row ids from another database
+(`{ "type": "relation", "database_id": "authors", "synced_property_id": "a_books" }`).
+With `synced_property_id`, the other database has a matching property and the web
+app keeps both sides in step. A rollup names a relation, a property in the linked
+database and a function:
+`{ "type": "rollup", "relation_property": "a_books", "target_property": "r_rating", "function": "average" }`.
+Queries resolve both across databases.
 
 ## API
 
@@ -82,7 +94,8 @@ A transaction is all-or-nothing:
   "operations": [
     { "op": "add_row", "row": { "id": "r1", "props": { "title": "Dune", "pages": 412 } } },
     { "op": "set_value", "row_id": "r1", "property_id": "pages", "value": 420 },
-    { "op": "set_body", "row_id": "r1", "body": "Notes…" }
+    { "op": "set_body", "row_id": "r1", "body": "Notes…" },
+    { "op": "set_value", "row_id": "r1", "property_id": "author", "value": ["au1"] }
   ]
 }
 ```
@@ -119,3 +132,5 @@ The response has `results`, `total`, `has_more`, `next_cursor` and
 - Any client holding the token can read and change everything; there are no
   per-user accounts.
 - Edits to the same field from two tabs: the last write wins.
+- The API stores what it is sent: a client that edits one side of a two-way
+  relation through the API should also update the other side (the web app does).

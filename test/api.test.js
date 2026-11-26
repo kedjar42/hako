@@ -21,10 +21,21 @@ test("rejects requests without the token", async () => {
   assert.equal((await call("GET", "/health", null, false)).status, 200);
 });
 
-test("seeds the example database on first run", async () => {
+test("seeds the two linked example databases on first run", async () => {
   const { data } = await call("GET", "/databases");
-  assert.equal(data.length, 1);
-  assert.equal(data[0].row_count, 6);
+  assert.deepEqual(data.map(d => [d.id, d.row_count]), [["reading-list", 7], ["authors", 7]]);
+});
+
+test("relations and rollups resolve across databases in queries", async () => {
+  const q = await call("POST", "/databases/authors/query", { view_id: "av_all", limit: 2 });
+  assert.equal(q.data.results[0].props.a_name, "Ursula K. Le Guin");
+  assert.deepEqual(q.data.results[0].props.a_books, ["bk1", "bk2"]);
+  const byAuthor = await call("POST", "/databases/reading-list/query", { filter: [{ property: "r_author", op: "contains", value: "au1" }] });
+  assert.equal(byAuthor.data.total, 2);
+  const avg = await call("POST", "/databases/authors/query", { filter: [{ property: "a_avg", op: "gte", value: "4.5" }] });
+  assert.deepEqual(avg.data.results.map(r => r.props.a_name), ["Ursula K. Le Guin"]);
+  const bad = await call("POST", "/databases/authors/transactions", { operations: [{ op: "set_value", row_id: "au1", property_id: "a_books", value: "bk1" }] });
+  assert.equal(bad.status, 400);
 });
 
 test("create, edit through a transaction, query, and read history", async () => {
@@ -83,6 +94,6 @@ test("deleting a property removes its values; deleting a database cascades", asy
 
 test("validates input", async () => {
   assert.equal((await call("POST", "/databases", { schema: { a: { name: "A", type: "text" } } })).status, 400);
-  assert.equal((await call("POST", "/databases/product-tasks/transactions", { operations: [{ op: "nope" }] })).status, 400);
-  assert.equal((await call("POST", "/databases/product-tasks/transactions", { operations: [{ op: "add_row", row: { id: "bad id!" } }] })).status, 400);
+  assert.equal((await call("POST", "/databases/authors/transactions", { operations: [{ op: "nope" }] })).status, 400);
+  assert.equal((await call("POST", "/databases/authors/transactions", { operations: [{ op: "add_row", row: { id: "bad id!" } }] })).status, 400);
 });

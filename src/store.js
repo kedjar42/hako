@@ -72,7 +72,7 @@ export class HttpError extends Error {
 }
 
 const MAX_ROWS = 50_000; // like Notion's RowLimitExceededError
-const PROPERTY_TYPES = new Set(["title", "text", "number", "select", "multi_select", "status", "date", "checkbox", "url", "email", "formula", "created_time"]);
+const PROPERTY_TYPES = new Set(["title", "text", "number", "select", "multi_select", "status", "date", "checkbox", "url", "email", "formula", "created_time", "relation", "rollup"]);
 const VIEW_TYPES = new Set(["table", "board", "list"]);
 const isId = v => typeof v === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(v);
 const needId = (v, what) => { if (!isId(v)) throw new HttpError(400, `${what} must be 1–64 letters, digits, - or _`); return v; };
@@ -193,7 +193,8 @@ export function openStore(file = ":memory:") {
   function setValue(dbId, rowId, propId, value) {
     const p = stmt.propExists.get(dbId, needId(propId, "Property id"));
     if (!p) throw new HttpError(400, `Property ${propId} doesn't exist`);
-    if (p.type === "formula" || p.type === "created_time") return; // computed, never stored
+    if (p.type === "formula" || p.type === "created_time" || p.type === "rollup") return; // computed, never stored
+    if (p.type === "relation" && value != null && (!Array.isArray(value) || !value.every(isId))) throw new HttpError(400, "A relation value must be a list of row ids");
     if (value === null || value === undefined || value === "" || (Array.isArray(value) && !value.length)) stmt.delVal.run(dbId, rowId, propId);
     else { const s = json(value); if (s.length > 20_000) throw new HttpError(400, "Value is too large"); stmt.setVal.run(dbId, rowId, propId, s); }
   }
