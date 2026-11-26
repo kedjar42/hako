@@ -1,0 +1,799 @@
+<title>Tabula Databases</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: database list rail on the left; the open database shows a view bar, a filter/sort bar, then the table or board; rows open in a side panel. */
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --ink:#1d2421; --muted:#636d68; --line:#e1e5e2; --hover:#eef1ef;
+  --accent:#147a64; --accent-soft:#dcefe9; --danger:#b4433b;
+  --t-gray:#e6e8e6; --t-brown:#efe3d8; --t-orange:#fbe2cf; --t-yellow:#f8efc4; --t-green:#d8eedd; --t-blue:#d9e7f7; --t-purple:#e8def5; --t-pink:#f6dde9; --t-red:#f8dbd7;
+  --t-ink:#27302c;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141816; --surface:#1b201e; --ink:#e4e9e6; --muted:#97a29c; --line:#2c3330; --hover:#232a27;
+  --accent:#52c4a6; --accent-soft:#1f3a33; --danger:#ef7d73;
+  --t-gray:#353b38; --t-brown:#4a3a2e; --t-orange:#5a3a22; --t-yellow:#544a1d; --t-green:#244331; --t-blue:#22394f; --t-purple:#3b2d52; --t-pink:#4f2a3c; --t-red:#55292a;
+  --t-ink:#eef2ef; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141816; --surface:#1b201e; --ink:#e4e9e6; --muted:#97a29c; --line:#2c3330; --hover:#232a27;
+  --accent:#52c4a6; --accent-soft:#1f3a33; --danger:#ef7d73;
+  --t-gray:#353b38; --t-brown:#4a3a2e; --t-orange:#5a3a22; --t-yellow:#544a1d; --t-green:#244331; --t-blue:#22394f; --t-purple:#3b2d52; --t-pink:#4f2a3c; --t-red:#55292a;
+  --t-ink:#eef2ef; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;max-width:1360px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+@media (max-width:800px){.app{grid-template-columns:1fr}}
+.rail{display:flex;flex-direction:column;gap:10px;min-width:0}
+.brand{font-family:var(--display);font-size:21px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand svg{flex:none}
+.rail ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rail h2{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 0 2px;padding:0 9px}
+.badge{width:20px;height:20px;border-radius:5px;background:var(--accent);color:var(--surface);font-size:11px;font-weight:600;display:inline-grid;place-items:center;flex:none}
+.rail li button .nm{display:flex;gap:9px;align-items:center;min-width:0}
+.rail li button .nm span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.newdb{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 10px;text-align:left;color:var(--muted);font-size:13px}
+.newdb:hover{color:var(--ink);background:var(--hover)}
+.rail li button{width:100%;text-align:left;border:0;background:none;padding:7px 9px;border-radius:6px;display:flex;justify-content:space-between;gap:8px}
+.rail li button:hover{background:var(--hover)}
+.rail li button[aria-current="true"]{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-weight:500}
+.rail small{color:var(--muted);font-family:var(--mono);font-size:11px}
+.hint{color:var(--muted);font-size:12px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.ghost:hover{background:var(--hover);color:var(--ink)}
+.btn.danger{color:var(--danger)}
+.main{min-width:0}
+.dbhead{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px 14px;margin-bottom:10px}
+.dbhead .main{display:grid;gap:4px;min-width:0}
+.linked{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.linked button{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:1px 7px;font-size:12.5px;color:var(--ink)}
+.linked button:hover{background:var(--hover)}
+.dbmeta{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;padding-top:10px}
+.search{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:5px 10px;min-width:0;width:200px;max-width:100%}
+.rowcount{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+.btn.ghost.on{color:var(--accent)}
+.rel{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:0 6px;font-size:12.5px;line-height:20px;background:var(--surface);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filters{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 8px}
+.dbtitle{font-family:var(--display);font-size:clamp(24px,3vw,30px);font-weight:700;letter-spacing:-.015em;border:0;background:none;padding:2px 4px;margin-left:-4px;border-radius:4px;min-width:0;width:auto;max-width:100%}
+.dbtitle:hover{background:var(--hover)}
+.tag-ex{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.views{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;align-items:end}
+.views button{border:0;background:none;padding:7px 10px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.views button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0}
+.toolbar .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--accent);color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 4px 2px 10px;font-size:12.5px;max-width:100%}
+.chip select,.chip input{border:0;background:transparent;color:inherit;font-size:12.5px;max-width:140px;padding:1px 0}
+.chip input{border-bottom:1px solid currentColor;width:100px}
+.chip .x{border:0;background:none;color:inherit;padding:0 5px;border-radius:999px}
+.chip .x:hover{background:var(--surface)}
+.pop{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:6px;min-width:200px;max-width:min(320px,calc(100vw - 32px));max-height:60vh;overflow:auto}
+.pop button.item{display:flex;width:100%;gap:8px;align-items:center;text-align:left;border:0;background:none;padding:6px 8px;border-radius:5px}
+.pop button.item:hover{background:var(--hover)}
+.pop label{display:grid;gap:3px;font-size:12px;color:var(--muted);padding:4px 6px}
+.pop input,.pop select,.pop textarea{border:1px solid var(--line);border-radius:5px;background:var(--bg);padding:5px 7px;color:var(--ink)}
+.pop .sep{height:1px;background:var(--line);margin:5px 0}
+.pop .row{display:flex;gap:6px;padding:4px 6px}
+.ic{width:16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+/* table */
+.tablewrap{overflow-x:auto;border-top:1px solid var(--line)}
+table{border-collapse:collapse;min-width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0;text-align:left;vertical-align:top}
+th:last-child,td:last-child{border-right:0}
+th{font-weight:500;color:var(--muted);font-size:13px;white-space:nowrap}
+th button.h{border:0;background:none;color:inherit;padding:7px 8px;width:100%;text-align:left;display:flex;gap:6px;align-items:center}
+th button.h:hover{background:var(--hover)}
+td .cell{min-height:34px;padding:6px 8px;width:100%;display:flex;flex-wrap:wrap;gap:4px;align-items:center;border:0;background:none;text-align:left;cursor:text}
+td .cell:hover{background:var(--hover)}
+td.num .cell{justify-content:flex-end;font-family:var(--mono);font-size:13px}
+td input.edit,td select.edit{width:100%;border:0;padding:6px 8px;min-height:34px;background:var(--surface);outline:2px solid var(--accent);outline-offset:-2px}
+.titlecell{display:flex;align-items:center}
+.titlecell .cell{flex:1;font-weight:500}
+.open{border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-right:6px;opacity:0}
+tr:hover .open,.open:focus-visible{opacity:1}
+@media (hover:none){.open{opacity:1}}
+.addrow{border:0;background:none;color:var(--muted);padding:7px 8px;width:100%;text-align:left}
+.addrow:hover{background:var(--hover);color:var(--ink)}
+tfoot td{color:var(--muted);font-size:12px}
+tfoot select{border:0;background:none;color:var(--muted);font-size:12px;padding:6px 4px;width:100%;text-align:right}
+tfoot .agg{display:flex;justify-content:flex-end;align-items:center;gap:4px;padding-right:6px}
+tfoot b{color:var(--ink);font-weight:500;font-family:var(--mono)}
+.tg{display:inline-block;border-radius:4px;padding:0 6px;font-size:12.5px;line-height:20px;background:var(--t-gray);color:var(--t-ink);white-space:nowrap}
+.check{width:16px;height:16px;accent-color:var(--accent)}
+.url{color:var(--accent);text-decoration:underline;text-underline-offset:2px;word-break:break-all}
+.empty{color:var(--muted);padding:24px 8px}
+/* board */
+.board{display:flex;gap:12px;overflow-x:auto;padding:8px 0 12px;align-items:flex-start}
+.col{flex:0 0 260px;background:color-mix(in srgb,var(--hover) 70%,transparent);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:8px;min-height:80px}
+.col.drop{outline:2px dashed var(--accent);outline-offset:-2px}
+.colhead{display:flex;align-items:center;gap:8px;font-size:13px}
+.colhead small{color:var(--muted);font-family:var(--mono)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;text-align:left;display:grid;gap:6px;cursor:grab;width:100%}
+.card:hover{border-color:var(--muted)}
+.card b{font-weight:500}
+.card .props{display:flex;flex-wrap:wrap;gap:4px;font-size:12px;color:var(--muted)}
+/* list */
+.list{border-top:1px solid var(--line)}
+.list button.li{display:flex;width:100%;gap:12px;align-items:center;border:0;border-bottom:1px solid var(--line);background:none;padding:9px 6px;text-align:left;flex-wrap:wrap}
+.list button.li:hover{background:var(--hover)}
+.list .li b{font-weight:500;margin-right:auto}
+/* peek */
+.peek{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--surface);border-left:1px solid var(--line);box-shadow:-16px 0 40px rgba(0,0,0,.12);z-index:25;overflow:auto;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) 24px;display:flex;flex-direction:column;gap:14px}
+.peek .ptitle{font-family:var(--display);font-size:26px;font-weight:700;border:0;background:none;padding:2px 0;width:100%}
+.props-grid{display:grid;grid-template-columns:140px minmax(0,1fr);gap:2px 10px;align-items:start}
+.props-grid .k{color:var(--muted);padding:7px 0;display:flex;gap:6px;align-items:center;font-size:13px}
+.props-grid .v{min-width:0}
+.props-grid .v .cell{min-height:32px;padding:6px 6px;width:100%;display:flex;flex-wrap:wrap;gap:4px;align-items:center;border:0;background:none;text-align:left;border-radius:4px}
+.props-grid .v .cell:hover{background:var(--hover)}
+.props-grid input.edit,.props-grid select.edit{width:100%;border:1px solid var(--accent);border-radius:4px;padding:5px 6px;background:var(--surface)}
+.peek textarea{width:100%;min-height:180px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:10px;resize:vertical}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:40;display:flex;gap:10px;align-items:center}
+.toast button{border:0;background:none;color:inherit;text-decoration:underline;padding:0}
+.muted{color:var(--muted)}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="20" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M1 8h20M8 8v13" stroke="currentColor" stroke-width="2" fill="none"/></svg>Tabula</div>
+    <h2>Databases</h2>
+    <ul id="dbList"></ul>
+    <button class="newdb" type="button" id="newDb">+ New database</button>
+    <p class="hint" id="storeNote">Saved in this browser.</p>
+    <p class="hint">Undo with Ctrl/⌘+Z.</p>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<div class="pop" id="pop" hidden></div>
+<aside class="peek" id="peek" hidden aria-label="Row details"></aside>
+<div class="toast" id="toast" hidden></div>
+
+<script type="module">
+import { TYPES, COLORS, OPS, opKind, AGGS, blankDb, titleProp, optOf, valueOf, displayText, fmtNum, fmtDate, isEmpty, runFormula, runQuery, aggregate, aggOptions, ROLLUP_FNS, setResolver, relatedRows } from "./engine.js";
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+function h(tag, props = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k === "text") n.textContent = v;
+    else if (k === "class") n.className = v;
+    else if (k === "style") n.style.cssText = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (k === "value") n.value = v;
+    else if (k === "checked") n.checked = !!v;
+    else n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c !== null && c !== undefined && c !== false) n.append(c);
+  return n;
+}
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+// ---- State ----
+let dbs = [];
+let curId = null, curViewId = null, peekRowId = null, editing = null, searchQ = "";
+setResolver(id => dbs.find(d => d.id === id)); // relations and rollups read linked databases from memory
+const dbById = id => dbs.find(d => d.id === id);
+const undoStack = [];
+
+// ---- Server sync: every edit becomes a transaction of small operations ----
+const CLIENT_ID = Math.random().toString(36).slice(2);
+const params = new URLSearchParams(location.search);
+let token = params.get("token") || "";
+try { if (token) localStorage.setItem("tabula.token", token); else token = localStorage.getItem("tabula.token") || ""; } catch {}
+async function api(method, path, body) {
+  const res = await fetch("/api" + path, { method, headers: { "content-type": "application/json", "x-client-id": CLIENT_ID, ...(token ? { authorization: "Bearer " + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(data.error || "Request failed (" + res.status + ")"); e.status = res.status; throw e; }
+  return data;
+}
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Compare two copies of a database and list the operations that turn one into the other.
+function diff(before, after) {
+  const ops = [];
+  if (before.name !== after.name) ops.push({ op: "rename_database", name: after.name });
+  const bk = Object.keys(before.schema), ak = Object.keys(after.schema);
+  // Delete rows and views before properties, and add properties before rows that use them.
+  const bRows = new Map(before.rows.map(r => [r.id, r])), aRows = new Map(after.rows.map(r => [r.id, r]));
+  for (const id of bRows.keys()) if (!aRows.has(id)) ops.push({ op: "delete_row", id });
+  const bViews = new Map(before.views.map(v => [v.id, v]));
+  const aViewIds = new Set(after.views.map(v => v.id));
+  const viewDeletes = [...bViews.keys()].filter(id => !aViewIds.has(id)).map(id => ({ op: "delete_view", id }));
+  ak.forEach((k, i) => { if (!before.schema[k] || !same(before.schema[k], after.schema[k]) || bk.indexOf(k) !== i) ops.push({ op: "set_property", id: k, property: after.schema[k], position: i }); });
+  after.views.forEach((v, i) => { const o = bViews.get(v.id); const idx = before.views.findIndex(x => x.id === v.id); if (!o || !same(o, v) || idx !== i) ops.push({ op: "set_view", id: v.id, view: { name: v.name, type: v.type, format: v.format, query2: v.query2 }, position: i }); });
+  ops.push(...viewDeletes);
+  for (const k of bk) if (!after.schema[k]) ops.push({ op: "delete_property", id: k });
+  for (const [id, r] of aRows) {
+    const o = bRows.get(id);
+    if (!o) { ops.push({ op: "add_row", row: { id, created: r.created, body: r.body || "", props: Object.fromEntries(Object.entries(r.props).filter(([k]) => after.schema[k])) } }); continue; }
+    for (const k of new Set([...Object.keys(o.props), ...Object.keys(r.props)])) if (after.schema[k] && !same(o.props[k] ?? null, r.props[k] ?? null)) ops.push({ op: "set_value", row_id: id, property_id: k, value: r.props[k] ?? null });
+    if ((o.body || "") !== (r.body || "")) ops.push({ op: "set_body", row_id: id, body: r.body || "" });
+  }
+  return ops;
+}
+const queues = new Map(); // one in-flight chain per database keeps transactions in order
+function push(before, after, label) {
+  const ops = diff(before, after); if (!ops.length) return;
+  const run = () => api("POST", "/databases/" + after.id + "/transactions", { user_action: label, operations: ops })
+    .then(r => { const d = dbs.find(x => x.id === after.id); if (d) d.version = r.version; setStatus("Saved"); })
+    .catch(e => { setStatus("Not saved"); toast("Couldn't save: " + e.message + ". Reloading from the server."); reloadOne(after.id); });
+  setStatus("Saving…");
+  queues.set(after.id, (queues.get(after.id) || Promise.resolve()).then(run));
+}
+function setStatus(t) { const n = $("#storeNote"); if (n) n.textContent = t === "Saved" ? "Saved to your server." : t === "Saving…" ? "Saving…" : "Some changes weren't saved."; }
+async function reloadOne(id) {
+  try { const fresh = await api("GET", "/databases/" + id); const i = dbs.findIndex(d => d.id === id); if (i >= 0) dbs[i] = fresh; else dbs.push(fresh); }
+  catch (e) { if (e.status === 404) { dbs = dbs.filter(d => d.id !== id); if (curId === id) { curId = dbs[0]?.id ?? null; curViewId = dbs[0]?.views[0].id ?? null; } } }
+  if (!dbs.some(d => d.id === curId)) { curId = dbs[0]?.id ?? null; curViewId = dbs[0]?.views[0]?.id ?? null; }
+  render();
+}
+
+// ---- Transactions with undo (each edit snapshots the database first) ----
+// An edit can touch two databases (a two-way relation), so the snapshot covers all of them
+// and each database that changed gets its own transaction.
+function commit(label, fn) {
+  const db = cur(); if (!db) return;
+  const snapshot = JSON.stringify(dbs);
+  undoStack.push({ dbId: db.id, label, snapshot });
+  if (undoStack.length > 100) undoStack.shift();
+  fn(db);
+  syncRelations(db);
+  for (const before of JSON.parse(snapshot)) { const after = dbById(before.id); if (after) push(before, after, label); }
+  render();
+}
+function undo() {
+  const u = undoStack.pop(); if (!u) return;
+  const saved = JSON.parse(u.snapshot);
+  if (!Array.isArray(saved)) { restoreDeleted(saved); return; }
+  for (const restored of saved) {
+    const i = dbs.findIndex(d => d.id === restored.id); if (i < 0) continue;
+    const before = dbs[i]; restored.version = before.version; dbs[i] = restored;
+    push(before, restored, "Undo: " + u.label);
+  }
+  curId = u.dbId; const d = cur();
+  if (d && !d.views.some(v => v.id === curViewId)) curViewId = d.views[0].id;
+  render(); toast("Undid: " + u.label);
+}
+function restoreDeleted(d) {
+  dbs.push(d); curId = d.id; curViewId = d.views[0].id; render();
+  api("POST", "/databases", d).then(() => reloadOne(d.id)).catch(e => toast("Couldn't restore: " + e.message));
+}
+// Keep two-way relations in step: the other side lists exactly the rows that point at it.
+function syncRelations(db) {
+  for (const [key, p] of Object.entries(db.schema)) {
+    if (p.type !== "relation" || !p.synced_property_id) continue;
+    const other = dbById(p.database_id), sk = p.synced_property_id;
+    if (!other || !other.schema[sk] || (other === db && sk === key)) continue;
+    for (const tr of other.rows) {
+      const want = db.rows.filter(r => (r.props[key] || []).includes(tr.id)).map(r => r.id);
+      const curIds = tr.props[sk] || [];
+      const next = [...curIds.filter(id => want.includes(id)), ...want.filter(id => !curIds.includes(id))];
+      if (!same(curIds, next)) tr.props[sk] = next;
+    }
+  }
+}
+const uniqueName = (db, base) => { let n = base, i = 2; while (Object.values(db.schema).some(x => x.name === n)) n = base + " " + i++; return n; };
+const shortName = d => (d?.name || "Untitled database").replace(/\s*\(example\)$/, "");
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.shiftKey && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) { e.preventDefault(); undo(); }
+  if (e.key === "Escape") { if (!$("#pop").hidden) closePop(); else if (peekRowId) { peekRowId = null; renderPeek(); } }
+});
+
+const cur = () => dbs.find(d => d.id === curId);
+const curView = () => cur()?.views.find(v => v.id === curViewId) || cur()?.views[0];
+
+// ---- Popover ----
+let popAnchor = null;
+function openPop(anchor, build) {
+  const pop = $("#pop"); pop.replaceChildren(); build(pop); pop.hidden = false; popAnchor = anchor;
+  const r = anchor.getBoundingClientRect(), w = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = Math.min(r.left + scrollX, scrollX + innerWidth - w - 16); left = Math.max(scrollX + 16, left);
+  let top = r.bottom + scrollY + 4; if (r.bottom + ph + 8 > innerHeight && r.top > ph) top = r.top + scrollY - ph - 4;
+  pop.style.left = left + "px"; pop.style.top = top + "px";
+  pop.querySelector("input,select,button")?.focus();
+}
+function closePop() { $("#pop").hidden = true; popAnchor?.focus?.(); popAnchor = null; }
+document.addEventListener("mousedown", e => { const pop = $("#pop"); if (!pop.hidden && !pop.contains(e.target) && e.target !== popAnchor && !popAnchor?.contains(e.target)) closePop(); });
+const item = (label, onclick, ic) => h("button", { class: "item", type: "button", onclick }, ic ? h("span", { class: "ic", text: ic }) : null, h("span", { text: label }));
+
+let toastTimer;
+function toast(msg, action) {
+  const t = $("#toast"); t.replaceChildren(h("span", { text: msg }), action ? h("button", { type: "button", onclick: () => { action.fn(); t.hidden = true; }, text: action.label }) : null);
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3500);
+}
+
+// ---- Cell rendering & editing ----
+function tagEl(prop, id) { const o = optOf(prop, id); return o ? h("span", { class: "tg", style: `background:var(--t-${o.color})`, text: o.value }) : null; }
+function cellContent(db, key, row) {
+  const p = db.schema[key], v = valueOf(db, key, row);
+  if (p.type === "select" || p.type === "status") return [tagEl(p, v)];
+  if (p.type === "multi_select") return (v || []).map(id => tagEl(p, id));
+  if (p.type === "checkbox") return [h("input", { type: "checkbox", class: "check", checked: v, "aria-label": p.name, onclick: e => { e.stopPropagation(); commit("Toggle " + p.name, () => { row.props[key] = e.target.checked; }); } })];
+  if (p.type === "url" && v) return [h("a", { class: "url", href: /^https?:\/\//.test(v) ? v : "https://" + v, target: "_blank", rel: "noopener", onclick: e => e.stopPropagation(), text: v })];
+  if (p.type === "formula" && v && v.error) return [h("span", { class: "muted", title: v.error, text: "Error" })];
+  if (p.type === "relation") return relatedRows(db, key, row).map(r => h("span", { class: "rel", text: r.title }));
+  return [h("span", { text: displayText(db, key, row) })];
+}
+const readOnly = t => t === "formula" || t === "created_time" || t === "checkbox" || t === "rollup";
+// Pick linked rows from the other database; typing a new name creates that row there.
+function relationPicker(db, key, row, anchor) {
+  const p = db.schema[key], target = dbById(p.database_id);
+  openPop(anchor, pop => {
+    if (!target) { pop.append(h("p", { class: "hint", style: "padding:6px", text: "The linked database was deleted." })); return; }
+    const tKey = titleProp(target);
+    const q = h("input", { type: "text", placeholder: "Link or create a row in " + shortName(target), "aria-label": "Search " + target.name, style: "width:100%" });
+    const list = h("div");
+    const draw = () => {
+      list.replaceChildren();
+      const s = q.value.trim().toLowerCase(), sel = row.props[key] || [];
+      const matches = target.rows.filter(r => String(r.props[tKey] || "").toLowerCase().includes(s));
+      matches.sort((a, b) => sel.includes(b.id) - sel.includes(a.id));
+      for (const r of matches.slice(0, 50)) list.append(h("button", { class: "item", type: "button", onclick: () => {
+        commit((sel.includes(r.id) ? "Unlink " : "Link ") + p.name, () => { const cur = row.props[key] || []; row.props[key] = cur.includes(r.id) ? cur.filter(x => x !== r.id) : [...cur, r.id]; });
+        relationPicker(cur(), key, findRow(row.id), document.querySelector(`[data-cell="${row.id}:${key}"]`) || anchor);
+      } }, h("span", { class: "ic", text: sel.includes(r.id) ? "✓" : "" }), h("span", { class: "rel", text: r.props[tKey] || "Untitled" })));
+      if (!matches.length && !s) list.append(h("p", { class: "hint", style: "padding:6px", text: shortName(target) + " has no rows yet." }));
+      if (s && !target.rows.some(r => String(r.props[tKey] || "").toLowerCase() === s)) list.append(item("Create “" + q.value.trim() + "” in " + shortName(target), () => {
+        const nr = { id: uid(), created: Date.now(), body: "", props: { [tKey]: q.value.trim() } };
+        commit("Create and link row", () => { target.rows.push(nr); row.props[key] = [...(row.props[key] || []), nr.id]; });
+        relationPicker(cur(), key, findRow(row.id), document.querySelector(`[data-cell="${row.id}:${key}"]`) || anchor);
+      }, "+"));
+    };
+    q.addEventListener("input", draw);
+    q.addEventListener("keydown", e => { if (e.key === "Enter") list.querySelector("button")?.click(); });
+    pop.append(h("div", { class: "row" }, q), list); draw();
+  });
+}
+function startEdit(db, key, row, container, onDone) {
+  const p = db.schema[key]; if (readOnly(p.type)) return;
+  if (p.type === "select" || p.type === "status" || p.type === "multi_select") { optionPicker(db, key, row, container); return; }
+  if (p.type === "relation") { relationPicker(db, key, row, container); return; }
+  const inp = h("input", { class: "edit", type: p.type === "number" ? "number" : p.type === "date" ? "date" : p.type === "email" ? "email" : p.type === "url" ? "url" : "text", value: row.props[key] ?? "", "aria-label": p.name });
+  let done = false;
+  const finish = keep => { if (done) return; done = true; const nv = p.type === "number" ? (inp.value === "" ? null : Number(inp.value)) : inp.value; if (keep && nv !== (row.props[key] ?? (p.type === "number" ? null : ""))) commit("Edit " + p.name, () => { row.props[key] = nv; }); else onDone(); };
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") finish(true); if (e.key === "Escape") { e.stopPropagation(); finish(false); } });
+  inp.addEventListener("blur", () => finish(true));
+  container.replaceChildren(inp); inp.focus(); if (inp.select && inp.type === "text") inp.select();
+}
+function optionPicker(db, key, row, anchor) {
+  const p = db.schema[key], multi = p.type === "multi_select";
+  openPop(anchor, pop => {
+    const q = h("input", { type: "text", placeholder: "Search or create an option", "aria-label": "Search options", style: "width:100%" });
+    const list = h("div");
+    const draw = () => {
+      list.replaceChildren();
+      const s = q.value.trim().toLowerCase();
+      const sel = multi ? row.props[key] || [] : [row.props[key]];
+      for (const o of p.options.filter(o => o.value.toLowerCase().includes(s))) {
+        list.append(h("button", { class: "item", type: "button", onclick: () => {
+          commit("Set " + p.name, () => { if (multi) { const cur = row.props[key] || []; row.props[key] = cur.includes(o.id) ? cur.filter(x => x !== o.id) : [...cur, o.id]; } else row.props[key] = row.props[key] === o.id ? null : o.id; });
+          if (multi) optionPicker(db, key, findRow(row.id), document.querySelector(`[data-cell="${row.id}:${key}"]`) || anchor); else closePop();
+        } }, h("span", { class: "ic", text: sel.includes(o.id) ? "✓" : "" }), h("span", { class: "tg", style: `background:var(--t-${o.color})`, text: o.value })));
+      }
+      if (s && !p.options.some(o => o.value.toLowerCase() === s)) list.append(item("Create “" + q.value.trim() + "”", () => {
+        const id = uid(), value = q.value.trim();
+        commit("Add option", () => { p.options.push({ id, value, color: COLORS[p.options.length % COLORS.length] }); row.props[key] = multi ? [...(row.props[key] || []), id] : id; });
+        closePop();
+      }, "+"));
+    };
+    q.addEventListener("input", draw);
+    q.addEventListener("keydown", e => { if (e.key === "Enter") list.querySelector("button")?.click(); });
+    pop.append(h("div", { class: "row" }, q), list); draw();
+  });
+}
+const findRow = id => cur()?.rows.find(r => r.id === id);
+
+// ---- Property (column) menu ----
+function propMenu(db, key, anchor) {
+  const p = db.schema[key], view = curView();
+  openPop(anchor, pop => {
+    const name = h("input", { type: "text", value: p.name, "aria-label": "Property name" });
+    name.addEventListener("change", () => { const v = name.value.trim(); if (v && v !== p.name && !Object.values(db.schema).some(x => x.name === v)) commit("Rename property", () => { p.name = v; }); });
+    pop.append(h("label", {}, "Name", name));
+    if (p.type !== "title") {
+      const type = h("select", { "aria-label": "Property type" }, Object.entries(TYPES).filter(([t]) => t !== "title" && ((t !== "relation" && t !== "rollup") || t === p.type)).map(([t, d]) => h("option", { value: t, text: d.label })));
+      type.value = p.type;
+      type.addEventListener("change", () => commit("Change type", () => convertType(db, key, type.value)));
+      pop.append(h("label", {}, "Type", type));
+    }
+    if (p.type === "formula") {
+      const ex = h("textarea", { rows: "3", "aria-label": "Formula", value: p.expression || "", style: "font-family:var(--mono);font-size:12px" });
+      const msg = h("div", { class: "hint" });
+      const test = () => { const r = db.rows[0] ? (() => { try { runFormula(ex.value, () => 1); return "Looks good."; } catch (e) { return e.message; } })() : ""; msg.textContent = r; };
+      ex.addEventListener("input", test);
+      ex.addEventListener("change", () => commit("Edit formula", () => { p.expression = ex.value; }));
+      pop.append(h("label", {}, "Formula", ex, msg, h("span", { class: "hint", text: 'Example: prop("Estimate (h)") * 85, or if(prop("Reviewed"), "OK", "Check")' })));
+    }
+    if (p.type === "relation") {
+      const target = dbById(p.database_id);
+      pop.append(h("div", { class: "row", style: "align-items:center;flex-wrap:wrap" }, h("span", { class: "hint", text: target ? "Links to" : "The linked database was deleted." }),
+        target ? h("button", { class: "btn", type: "button", onclick: () => { closePop(); openDb(target.id); }, text: target.name }) : null),
+        target && p.synced_property_id && target.schema[p.synced_property_id] ? h("p", { class: "hint", style: "padding:0 6px;margin:0", text: "Shown in " + target.name + " as “" + target.schema[p.synced_property_id].name + "”." }) : null);
+    }
+    if (p.type === "rollup") {
+      const rels = Object.entries(db.schema).filter(([, x]) => x.type === "relation");
+      if (!rels.length) pop.append(h("p", { class: "hint", style: "padding:0 6px", text: "Add a Relation property first. A rollup summarizes a property of the linked rows." }));
+      else {
+        const relSel = h("select", { "aria-label": "Relation" }, rels.map(([k, x]) => h("option", { value: k, text: x.name })));
+        relSel.value = p.relation_property || "";
+        relSel.addEventListener("change", () => commit("Change rollup", () => { p.relation_property = relSel.value; p.target_property = titleProp(dbById(db.schema[relSel.value].database_id) || { schema: {} }) || ""; }));
+        pop.append(h("label", {}, "Relation", relSel));
+        const target = dbById(db.schema[p.relation_property]?.database_id);
+        if (target) {
+          const propSel = h("select", { "aria-label": "Property" }, Object.entries(target.schema).map(([k, x]) => h("option", { value: k, text: x.name })));
+          propSel.value = p.target_property || "";
+          propSel.addEventListener("change", () => commit("Change rollup", () => { p.target_property = propSel.value; }));
+          const fnSel = h("select", { "aria-label": "Calculate" }, ROLLUP_FNS.map(([v, l]) => h("option", { value: v, text: l })));
+          fnSel.value = p.function || "count";
+          fnSel.addEventListener("change", () => commit("Change rollup", () => { p.function = fnSel.value; }));
+          pop.append(h("label", {}, "Property in " + shortName(target), propSel), h("label", {}, "Calculate", fnSel));
+        }
+      }
+    }
+    if (p.options) {
+      pop.append(h("div", { class: "sep" }), h("div", { class: "hint", style: "padding:2px 6px", text: "Options" }));
+      for (const o of p.options) {
+        const c = h("select", { "aria-label": "Color for " + o.value, style: "width:84px" }, COLORS.map(x => h("option", { value: x, text: x })));
+        c.value = o.color; c.addEventListener("change", () => commit("Recolor option", () => { o.color = c.value; }));
+        pop.append(h("div", { class: "row", style: "align-items:center" }, h("span", { class: "tg", style: `background:var(--t-${o.color});flex:1;overflow:hidden;text-overflow:ellipsis`, text: o.value }), c,
+          h("button", { class: "btn ghost", type: "button", "aria-label": "Delete option " + o.value, onclick: () => { commit("Delete option", () => { p.options = p.options.filter(x => x !== o); for (const r of db.rows) { if (Array.isArray(r.props[key])) r.props[key] = r.props[key].filter(x => x !== o.id); else if (r.props[key] === o.id) r.props[key] = null; } }); closePop(); }, text: "×" })));
+      }
+    }
+    pop.append(h("div", { class: "sep" }));
+    pop.append(item("Sort ascending", () => { commit("Sort", () => { view.query2.sort = [{ property: key, direction: "ascending" }]; }); closePop(); }, "↑"));
+    pop.append(item("Sort descending", () => { commit("Sort", () => { view.query2.sort = [{ property: key, direction: "descending" }]; }); closePop(); }, "↓"));
+    if (opKind(p.type)) pop.append(item("Filter", () => { closePop(); addFilter(db, view, key); }, "⏷"));
+    if (view.type === "table" && p.type !== "title") pop.append(item("Hide in this view", () => { commit("Hide property", () => { const tp = view.format.table_properties.find(x => x.property === key); if (tp) tp.visible = false; }); closePop(); }, "◌"));
+    if (p.type !== "title") pop.append(item("Delete property", () => {
+      commit("Delete property", () => removeProp(db, key));
+      closePop(); toast("Deleted property", { label: "Undo", fn: undo });
+    }, "🗑"));
+  });
+}
+// Remove a property everywhere it is used; a two-way relation also removes its other side.
+function removeProp(d, key) {
+  const p = d.schema[key]; if (!p) return;
+  delete d.schema[key];
+  for (const r of d.rows) delete r.props[key];
+  for (const v of d.views) {
+    for (const f of ["table_properties"]) if (v.format[f]) v.format[f] = v.format[f].filter(x => x.property !== key);
+    for (const f of ["card_properties", "list_properties"]) if (v.format[f]) v.format[f] = v.format[f].filter(x => x !== key);
+    v.query2.filter = v.query2.filter.filter(f => f.property !== key); v.query2.sort = v.query2.sort.filter(s => s.property !== key); delete v.query2.aggregations[key];
+    if (v.format.board_columns_by === key) v.format.board_columns_by = null;
+  }
+  if (p.type === "relation" && p.synced_property_id) { const other = dbById(p.database_id); if (other?.schema[p.synced_property_id]?.synced_property_id === key) removeProp(other, p.synced_property_id); }
+}
+function convertType(db, key, type) {
+  const p = db.schema[key], old = p.type;
+  if (old === "relation" && p.synced_property_id) { const other = dbById(p.database_id); if (other) removeProp(other, p.synced_property_id); }
+  if (old === "relation" || old === "rollup") { for (const k of ["database_id", "synced_property_id", "relation_property", "target_property", "function"]) delete p[k]; }
+  const texts = db.rows.map(r => displayText(db, key, r));
+  p.type = type;
+  if (["select", "status", "multi_select"].includes(type)) {
+    const opts = p.options && ["select", "status", "multi_select"].includes(old) ? p.options : [];
+    const byVal = new Map(opts.map(o => [o.value, o.id]));
+    db.rows.forEach((r, i) => {
+      const parts = (type === "multi_select" ? texts[i].split(",") : [texts[i]]).map(s => s.trim()).filter(Boolean);
+      const ids = parts.map(v => { if (!byVal.has(v)) { const id = uid(); opts.push({ id, value: v, color: COLORS[opts.length % COLORS.length] }); byVal.set(v, id); } return byVal.get(v); });
+      r.props[key] = type === "multi_select" ? ids : ids[0] ?? null;
+    });
+    p.options = opts;
+  } else {
+    delete p.options;
+    db.rows.forEach((r, i) => { const s = texts[i]; r.props[key] = type === "number" ? (s === "" || isNaN(Number(s.replace(/,/g, ""))) ? null : Number(s.replace(/,/g, ""))) : type === "checkbox" ? ["yes", "true", "1", "x"].includes(s.toLowerCase()) : type === "date" ? (/^\d{4}-\d{2}-\d{2}$/.test(r.props[key]) ? r.props[key] : "") : s; });
+  }
+  if (type === "formula") p.expression = p.expression || "";
+  for (const v of db.views) { v.query2.filter = v.query2.filter.filter(f => f.property !== key); if (v.format.board_columns_by === key && !["select", "status"].includes(type)) v.format.board_columns_by = null; }
+}
+function addProperty(db, view, anchor) {
+  openPop(anchor, pop => {
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "New property" }));
+    for (const [t, d] of Object.entries(TYPES)) if (t !== "title") pop.append(item(d.label, () => {
+      if (t === "relation") { relationTargetPicker(db, anchor); return; }
+      const key = "p_" + uid(), n = uniqueName(db, d.label);
+      const firstRel = Object.keys(db.schema).find(k => db.schema[k].type === "relation");
+      commit("Add property", () => {
+        db.schema[key] = { name: n, type: t, ...(["select", "status", "multi_select"].includes(t) ? { options: t === "status" ? [{ id: uid(), value: "Not started", color: "gray" }, { id: uid(), value: "In progress", color: "blue" }, { id: uid(), value: "Done", color: "green" }] : [] } : {}), ...(t === "formula" ? { expression: "" } : {}),
+          ...(t === "rollup" ? { relation_property: firstRel || "", target_property: firstRel ? titleProp(dbById(db.schema[firstRel].database_id) || { schema: {} }) || "" : "", function: "count" } : {}) };
+        for (const v of db.views) if (v.format.table_properties) v.format.table_properties.push({ property: key, visible: true, width: 150 });
+      });
+      closePop();
+      setTimeout(() => { const btn = document.querySelector(`[data-prop="${key}"]`); if (btn) propMenu(cur(), key, btn); }, 0);
+    }, d.ic));
+  });
+}
+
+// A relation links this database to another (or to itself). Between two databases it is two-way:
+// each side gets a property, and linking a row on one side shows up on the other.
+function relationTargetPicker(db, anchor) {
+  openPop(anchor, pop => {
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Link to which database?" }));
+    for (const t of dbs) pop.append(item(t === db ? t.name + " (this database)" : t.name, () => {
+      const key = "p_" + uid(), sk = "p_" + uid(), two = t !== db;
+      commit("Add relation", () => {
+        db.schema[key] = { name: uniqueName(db, shortName(t)), type: "relation", database_id: t.id, ...(two ? { synced_property_id: sk } : {}) };
+        for (const v of db.views) if (v.format.table_properties) v.format.table_properties.push({ property: key, visible: true, width: 200 });
+        if (two) {
+          t.schema[sk] = { name: uniqueName(t, shortName(db)), type: "relation", database_id: db.id, synced_property_id: key };
+          for (const v of t.views) if (v.format.table_properties) v.format.table_properties.push({ property: sk, visible: true, width: 200 });
+        }
+      });
+      closePop();
+      setTimeout(() => { const btn = document.querySelector(`[data-prop="${key}"]`); if (btn) propMenu(cur(), key, btn); }, 0);
+    }, "⇄"));
+  });
+}
+
+// ---- Filters & sorts ----
+function addFilter(db, view, key) {
+  const p = db.schema[key], ops = OPS[opKind(p.type)];
+  commit("Add filter", () => { view.query2.filter.push({ property: key, op: ops[0][0], value: "" }); });
+}
+function filterChip(db, view, f, i) {
+  const p = db.schema[f.property]; if (!p) return null;
+  const ops = OPS[opKind(p.type)];
+  const opSel = h("select", { "aria-label": "Filter condition" }, ops.map(([v, l]) => h("option", { value: v, text: l })));
+  opSel.value = f.op; opSel.addEventListener("change", () => commit("Change filter", () => { f.op = opSel.value; }));
+  let valEl = null; const needsVal = !["is_empty", "is_not_empty", "checked", "unchecked"].includes(f.op);
+  if (needsVal) {
+    const k = opKind(p.type);
+    if (k === "relation") { const target = dbById(p.database_id), tk = target && titleProp(target); valEl = h("select", { "aria-label": "Filter value" }, h("option", { value: "", text: "Any" }), (target?.rows || []).map(r => h("option", { value: r.id, text: r.props[tk] || "Untitled" }))); valEl.value = f.value; valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
+    else if (k === "select" || k === "multi_select") { valEl = h("select", { "aria-label": "Filter value" }, h("option", { value: "", text: "Any" }), p.options.map(o => h("option", { value: o.id, text: o.value }))); valEl.value = f.value; valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
+    else { valEl = h("input", { type: k === "number" ? "number" : k === "date" ? "date" : "text", value: f.value, placeholder: "Value", "aria-label": "Filter value" }); valEl.addEventListener("change", () => commit("Change filter", () => { f.value = valEl.value; })); }
+  }
+  return h("span", { class: "chip" }, h("span", { text: p.name }), opSel, valEl, h("button", { class: "x", type: "button", "aria-label": "Remove filter", onclick: () => commit("Remove filter", () => { view.query2.filter.splice(i, 1); }), text: "×" }));
+}
+function sortChip(db, view, s, i) {
+  const p = db.schema[s.property]; if (!p) return null;
+  const dir = h("select", { "aria-label": "Sort direction" }, h("option", { value: "ascending", text: "Ascending" }), h("option", { value: "descending", text: "Descending" }));
+  dir.value = s.direction; dir.addEventListener("change", () => commit("Change sort", () => { s.direction = dir.value; }));
+  return h("span", { class: "chip" }, h("span", { text: "↕ " + p.name }), dir, h("button", { class: "x", type: "button", "aria-label": "Remove sort", onclick: () => commit("Remove sort", () => { view.query2.sort.splice(i, 1); }), text: "×" }));
+}
+function pickProp(db, anchor, filterFn, onPick, heading) {
+  openPop(anchor, pop => {
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: heading }));
+    for (const [k, p] of Object.entries(db.schema)) if (filterFn(p)) pop.append(item(p.name, () => { closePop(); onPick(k); }, TYPES[p.type].ic));
+  });
+}
+
+// ---- Rows ----
+function addRow(db, view, preset = {}) {
+  const r = { id: uid(), created: Date.now(), body: "", props: {} };
+  for (const f of view.query2.filter) { const p = db.schema[f.property]; if (!p) continue; if (f.op === "is" && (p.type === "select" || p.type === "status") && f.value) r.props[f.property] = f.value; if (f.op === "contains" && (p.type === "multi_select" || p.type === "relation") && f.value) r.props[f.property] = [f.value]; if (f.op === "checked") r.props[f.property] = true; }
+  Object.assign(r.props, preset);
+  commit("Add row", () => { db.rows.push(r); });
+  return r;
+}
+function deleteRow(db, row) {
+  commit("Delete row", () => { db.rows = db.rows.filter(x => x.id !== row.id); });
+  if (peekRowId === row.id) { peekRowId = null; renderPeek(); }
+  toast("Deleted row", { label: "Undo", fn: undo });
+}
+
+// ---- Views ----
+function renderTable(db, view, rows) {
+  const tp = view.format.table_properties.filter(x => x.visible && db.schema[x.property]);
+  const tKey = titleProp(db);
+  const head = h("tr", {}, tp.map(x => { const p = db.schema[x.property]; return h("th", { style: `min-width:${x.width}px` }, h("button", { class: "h", type: "button", "data-prop": x.property, onclick: e => propMenu(db, x.property, e.currentTarget) }, h("span", { class: "ic", text: TYPES[p.type].ic }), h("span", { text: p.name }))); }),
+    h("th", { style: "width:44px" }, h("button", { class: "h", type: "button", "aria-label": "Add property", onclick: e => addProperty(db, view, e.currentTarget), text: "+" })));
+  const body = rows.map(row => h("tr", {}, tp.map(x => {
+    const key = x.property, p = db.schema[key];
+    const cell = h("button", { class: "cell", type: "button", "data-cell": row.id + ":" + key, "aria-label": p.name + ": " + (displayText(db, key, row) || "empty"), onclick: e => { if (readOnly(p.type)) return; const td = e.currentTarget.parentElement; if (p.options) optionPicker(db, key, row, e.currentTarget); else startEdit(db, key, row, key === tKey ? td.querySelector(".titlecell") || td : td, () => render()); } }, cellContent(db, key, row));
+    if (key === tKey) return h("td", {}, h("div", { class: "titlecell" }, cell, h("button", { class: "open", type: "button", onclick: () => { peekRowId = row.id; renderPeek(); }, "aria-label": "Open " + (displayText(db, tKey, row) || "row"), text: "Open" })));
+    return h("td", { class: ["number", "formula", "rollup"].includes(p.type) ? "num" : "" }, cell);
+  }), h("td", {})));
+  const foot = h("tr", {}, tp.map(x => {
+    const p = db.schema[x.property], a = view.query2.aggregations[x.property] || "none";
+    const sel = h("select", { "aria-label": "Calculate " + p.name }, aggOptions(p.type).map(([v, l]) => h("option", { value: v, text: l })));
+    sel.value = a; sel.addEventListener("change", () => commit("Calculate", () => { if (sel.value === "none") delete view.query2.aggregations[x.property]; else view.query2.aggregations[x.property] = sel.value; }));
+    if (a === "none") return h("td", {}, sel);
+    const label = aggOptions(p.type).find(o => o[0] === a)?.[1] || "";
+    sel.hidden = true;
+    const btn = h("button", { class: "btn ghost", type: "button", style: "font-size:12px;padding:4px 6px", onclick: () => { btn.hidden = true; sel.hidden = false; sel.focus(); }, "aria-label": "Change calculation for " + p.name }, label + " ", h("b", { text: String(aggregate(db, x.property, rows, a)) }));
+    sel.addEventListener("blur", () => { if (!sel.hidden) { sel.hidden = true; btn.hidden = false; } });
+    return h("td", {}, h("div", { class: "agg" }, btn, sel));
+  }), h("td", {}));
+  const hiddenCount = view.format.table_properties.filter(x => !x.visible && db.schema[x.property]).length;
+  return h("div", {},
+    h("div", { class: "tablewrap" }, h("table", {}, h("thead", {}, head), h("tbody", {}, body,
+      h("tr", {}, h("td", { colspan: String(tp.length + 1) }, h("button", { class: "addrow", type: "button", onclick: () => { const r = addRow(db, view); setTimeout(() => document.querySelector(`[data-cell="${r.id}:${tKey}"]`)?.click(), 0); }, text: "+ New row" })))),
+      h("tfoot", {}, foot))),
+    hiddenCount ? h("button", { class: "btn ghost", type: "button", style: "margin-top:6px", onclick: e => openPop(e.currentTarget, pop => { for (const x of view.format.table_properties.filter(x => !x.visible && db.schema[x.property])) pop.append(item("Show " + db.schema[x.property].name, () => { commit("Show property", () => { x.visible = true; }); closePop(); }, "◉")); }), text: hiddenCount + " hidden " + (hiddenCount === 1 ? "property" : "properties") }) : null);
+}
+function renderBoard(db, view, rows) {
+  const gKey = view.format.board_columns_by;
+  const g = db.schema[gKey];
+  if (!g || !g.options) {
+    return h("div", { class: "empty" }, h("p", { text: "Pick a Select or Status property to group cards by." }), h("button", { class: "btn", type: "button", onclick: e => pickProp(db, e.currentTarget, p => p.type === "select" || p.type === "status", k => commit("Group board", () => { view.format.board_columns_by = k; }), "Group by") , text: "Choose property" }));
+  }
+  const tKey = titleProp(db);
+  const groups = [...g.options.map(o => ({ id: o.id, label: o.value, color: o.color })), { id: null, label: "No " + g.name, color: "gray" }];
+  const cardProps = (view.format.card_properties || []).filter(k => db.schema[k] && k !== gKey);
+  return h("div", { class: "board" }, groups.map(gr => {
+    const items = rows.filter(r => (r.props[gKey] ?? null) === gr.id);
+    if (gr.id === null && !items.length) return null;
+    const col = h("div", { class: "col", "data-group": gr.id ?? "" },
+      h("div", { class: "colhead" }, h("span", { class: "tg", style: `background:var(--t-${gr.color})`, text: gr.label }), h("small", { text: String(items.length) })),
+      items.map(r => h("button", { class: "card", type: "button", draggable: "true", "data-row": r.id, onclick: () => { peekRowId = r.id; renderPeek(); },
+        ondragstart: e => { e.dataTransfer.setData("text/plain", r.id); e.dataTransfer.effectAllowed = "move"; } },
+        h("b", { text: displayText(db, tKey, r) || "Untitled" }),
+        h("div", { class: "props" }, cardProps.flatMap(k => isEmpty(valueOf(db, k, r)) || db.schema[k].type === "checkbox" ? [] : cellContent(db, k, r))))),
+      h("button", { class: "addrow", type: "button", onclick: () => { const r = addRow(db, view, { [gKey]: gr.id }); peekRowId = r.id; renderPeek(); }, text: "+ New" }));
+    col.addEventListener("dragover", e => { e.preventDefault(); col.classList.add("drop"); });
+    col.addEventListener("dragleave", () => col.classList.remove("drop"));
+    col.addEventListener("drop", e => { e.preventDefault(); col.classList.remove("drop"); const id = e.dataTransfer.getData("text/plain"); const r = findRow(id); if (r && (r.props[gKey] ?? null) !== gr.id) commit("Move card", () => { r.props[gKey] = gr.id; }); });
+    return col;
+  }));
+}
+function renderList(db, view, rows) {
+  const tKey = titleProp(db), lp = (view.format.list_properties || []).filter(k => db.schema[k]);
+  return h("div", { class: "list" }, rows.map(r => h("button", { class: "li", type: "button", onclick: () => { peekRowId = r.id; renderPeek(); } }, h("b", { text: displayText(db, tKey, r) || "Untitled" }), lp.map(k => isEmpty(valueOf(db, k, r)) ? null : h("span", { style: "display:flex;gap:4px" }, cellContent(db, k, r))))),
+    h("button", { class: "addrow", type: "button", onclick: () => { const r = addRow(db, view); peekRowId = r.id; renderPeek(); }, text: "+ New row" }));
+}
+
+// ---- Peek panel (opening a row as a page) ----
+function renderPeek() {
+  const el = $("#peek"), db = cur(), row = db && findRow(peekRowId);
+  if (!row) { el.hidden = true; return; }
+  el.hidden = false; el.replaceChildren();
+  const tKey = titleProp(db);
+  const t = h("input", { class: "ptitle", value: row.props[tKey] || "", placeholder: "Untitled", "aria-label": "Title" });
+  t.addEventListener("change", () => commit("Rename row", () => { row.props[tKey] = t.value; }));
+  const grid = h("div", { class: "props-grid" });
+  for (const [k, p] of Object.entries(db.schema)) {
+    if (k === tKey) continue;
+    const v = h("div", { class: "v" });
+    const cell = h("button", { class: "cell", type: "button", "data-cell": row.id + ":" + k, onclick: e => { if (readOnly(p.type)) return; if (p.options) optionPicker(db, k, row, e.currentTarget); else if (p.type === "relation") relationPicker(db, k, row, e.currentTarget); else startEdit(db, k, row, v, () => renderPeek()); } }, cellContent(db, k, row));
+    if (isEmpty(valueOf(db, k, row)) && !readOnly(p.type)) cell.append(h("span", { class: "muted", text: "Empty" }));
+    v.append(cell);
+    grid.append(h("div", { class: "k" }, h("span", { class: "ic", text: TYPES[p.type].ic }), p.name), v);
+  }
+  const body = h("textarea", { "aria-label": "Page content", placeholder: "Write notes for this row…", value: row.body || "" });
+  body.addEventListener("change", () => commit("Edit page", () => { row.body = body.value; }));
+  el.append(
+    h("div", { style: "display:flex;justify-content:space-between;gap:8px" }, h("button", { class: "btn ghost", type: "button", onclick: () => { peekRowId = null; renderPeek(); }, text: "Close" }), h("button", { class: "btn ghost danger", type: "button", onclick: () => deleteRow(db, row), text: "Delete row" })),
+    t, grid, body);
+}
+
+// ---- Main render ----
+function renderRail() {
+  const ul = $("#dbList"); ul.replaceChildren();
+  for (const d of dbs) ul.append(h("li", {}, h("button", { type: "button", "aria-current": d.id === curId ? "true" : "false", onclick: () => openDb(d.id) },
+    h("span", { class: "nm" }, h("span", { class: "badge", "aria-hidden": "true", text: (shortName(d).trim()[0] || "U").toUpperCase() }), h("span", { text: d.name || "Untitled database" })))));
+}
+function openDb(id) { const d = dbById(id); if (!d) return; curId = d.id; curViewId = d.views[0].id; peekRowId = null; searchQ = ""; render(); }
+function render() {
+  renderRail();
+  const m = $("#main"); m.replaceChildren();
+  const db = cur(); if (!db) { m.append(h("p", { class: "empty", text: "Create a database to get started." })); return; }
+  const view = curView(); curViewId = view.id;
+  const name = h("input", { class: "dbtitle", value: db.name, "aria-label": "Database name", size: String(Math.max(8, db.name.length + 1)) });
+  name.addEventListener("change", () => commit("Rename database", () => { db.name = name.value.trim() || "Untitled database"; }));
+  const linked = [...new Set(Object.values(db.schema).filter(p => p.type === "relation" && p.database_id !== db.id).map(p => p.database_id))].map(dbById).filter(Boolean);
+  const propCount = Object.keys(db.schema).length;
+  m.append(h("div", { class: "dbhead" },
+    h("div", { class: "main" }, name, linked.length ? h("div", { class: "linked" }, "Linked to", linked.map(t => h("button", { type: "button", onclick: () => openDb(t.id), text: t.name }))) : null),
+    h("div", { class: "dbmeta" }, h("span", { text: `${db.rows.length} ${db.rows.length === 1 ? "row" : "rows"} · ${propCount} ${propCount === 1 ? "property" : "properties"}` }),
+      h("button", { class: "btn ghost", type: "button", "aria-label": "Database and view options", onclick: e => viewMenu(db, view, e.currentTarget), text: "•••" }))));
+
+  const vt = { table: "▦", board: "▥", list: "☰" };
+  m.append(h("div", { class: "views", role: "tablist" }, db.views.map(v => h("button", { type: "button", role: "tab", "aria-selected": v.id === view.id ? "true" : "false", onclick: () => { curViewId = v.id; render(); }, ondblclick: e => viewMenu(db, v, e.currentTarget) }, h("span", { class: "ic", text: vt[v.type] }), v.name)),
+    h("button", { type: "button", "aria-label": "Add view", onclick: e => openPop(e.currentTarget, pop => { for (const t of ["table", "board", "list"]) pop.append(item(t[0].toUpperCase() + t.slice(1), () => {
+      const tKey = titleProp(db), keys = Object.keys(db.schema);
+      const groupKey = keys.find(k => db.schema[k].type === "status") || keys.find(k => db.schema[k].type === "select") || null;
+      const nv = { id: uid(), name: t[0].toUpperCase() + t.slice(1), type: t, format: t === "table" ? { table_properties: keys.map(property => ({ property, visible: true, width: property === tKey ? 260 : 150 })) } : t === "board" ? { board_columns_by: groupKey, card_properties: keys.filter(k => k !== tKey && k !== groupKey).slice(0, 3) } : { list_properties: keys.filter(k => k !== tKey).slice(0, 3) }, query2: { filter: [], sort: [], aggregations: {} } };
+      commit("Add view", () => { db.views.push(nv); }); curViewId = nv.id; closePop(); render();
+    }, vt[t])); }), text: "+" })));
+
+  const nf = view.query2.filter.length, ns = view.query2.sort.length;
+  const search = h("input", { class: "search", id: "searchTitles", type: "search", placeholder: "Search titles", "aria-label": "Search titles", value: searchQ });
+  const count = h("span", { class: "rowcount", id: "rowCount" });
+  search.addEventListener("input", () => { searchQ = search.value; renderArea(); });
+  const tb = h("div", { class: "toolbar" }, search, count, h("span", { class: "sp" }),
+    h("button", { class: "btn ghost" + (nf ? " on" : ""), type: "button", onclick: e => pickProp(db, e.currentTarget, p => !!opKind(p.type), k => addFilter(db, view, k), "Filter by"), text: nf ? "Filter · " + nf : "Filter" }),
+    h("button", { class: "btn ghost" + (ns ? " on" : ""), type: "button", id: "sortBtn", onclick: e => sortMenu(db, view, e.currentTarget), text: ns ? "Sort · " + ns : "Sort" }),
+    view.type === "board" ? h("button", { class: "btn ghost", type: "button", onclick: e => pickProp(db, e.currentTarget, p => p.type === "select" || p.type === "status", k => commit("Group board", () => { view.format.board_columns_by = k; }), "Group by"), text: "Group" }) : null,
+    h("button", { class: "btn ghost", type: "button", id: "propsBtn", onclick: e => propertiesMenu(db, view, e.currentTarget), text: "Properties" }),
+    h("button", { class: "btn primary", type: "button", onclick: () => { const r = addRow(db, view); peekRowId = r.id; renderPeek(); }, text: "+ New" }));
+  m.append(tb);
+  if (nf) m.append(h("div", { class: "filters" }, view.query2.filter.map((f, i) => filterChip(db, view, f, i))));
+  m.append(h("div", { id: "viewArea" }));
+  renderArea();
+  renderPeek();
+}
+// The table/board/list area, redrawn on its own while typing in the search box.
+function renderArea() {
+  const db = cur(), view = curView(), area = $("#viewArea"); if (!db || !area) return;
+  const tKey = titleProp(db), q = searchQ.trim().toLowerCase();
+  let rows = runQuery(db, view);
+  if (q) rows = rows.filter(r => String(r.props[tKey] || "").toLowerCase().includes(q));
+  const c = $("#rowCount"); if (c) c.textContent = rows.length === db.rows.length ? `${rows.length} ${rows.length === 1 ? "row" : "rows"}` : `${rows.length} of ${db.rows.length} rows`;
+  area.replaceChildren(view.type === "board" ? renderBoard(db, view, rows) : view.type === "list" ? renderList(db, view, rows) : renderTable(db, view, rows));
+  if (!db.rows.length) area.append(h("p", { class: "empty", text: "No rows yet. Use + New to add the first one." }));
+  else if (!rows.length) area.append(h("p", { class: "empty", text: q ? "No titles match “" + searchQ.trim() + "”." : "No rows match these filters." }));
+}
+function sortMenu(db, view, anchor) {
+  openPop(anchor, pop => {
+    view.query2.sort.forEach((s, i) => { const c = sortChip(db, view, s, i); if (c) pop.append(h("div", { class: "row" }, c)); });
+    if (view.query2.sort.length) pop.append(h("div", { class: "sep" }));
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Add a sort" }));
+    for (const [k, p] of Object.entries(db.schema)) if (!view.query2.sort.some(s => s.property === k)) pop.append(item(p.name, () => { commit("Add sort", () => { view.query2.sort.push({ property: k, direction: "ascending" }); }); sortMenu(cur(), curView(), $("#sortBtn") || anchor); }, TYPES[p.type].ic));
+  });
+}
+// Show or hide properties in the current view, or add a new one.
+function propertiesMenu(db, view, anchor) {
+  openPop(anchor, pop => {
+    pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Shown in " + view.name }));
+    const tKey = titleProp(db);
+    for (const [k, p] of Object.entries(db.schema)) {
+      if (k === tKey) continue;
+      let on;
+      if (view.type === "table") { const tp = view.format.table_properties.find(x => x.property === k); on = !!tp && tp.visible; }
+      else on = (view.format[view.type === "board" ? "card_properties" : "list_properties"] || []).includes(k);
+      pop.append(item(p.name, () => {
+        commit((on ? "Hide " : "Show ") + p.name, () => {
+          if (view.type === "table") { const tp = view.format.table_properties.find(x => x.property === k); if (tp) tp.visible = !on; else view.format.table_properties.push({ property: k, visible: true, width: 150 }); }
+          else { const f = view.type === "board" ? "card_properties" : "list_properties"; const arr = view.format[f] || []; view.format[f] = on ? arr.filter(x => x !== k) : [...arr, k]; }
+        });
+        propertiesMenu(cur(), curView(), $("#propsBtn") || anchor);
+      }, on ? "✓" : ""));
+    }
+    pop.append(h("div", { class: "sep" }), item("New property", () => addProperty(db, view, anchor), "+"));
+  });
+}
+function viewMenu(db, view, anchor) {
+  openPop(anchor, pop => {
+    const n = h("input", { type: "text", value: view.name, "aria-label": "View name" });
+    n.addEventListener("change", () => commit("Rename view", () => { view.name = n.value.trim() || view.name; }));
+    pop.append(h("label", {}, "View name", n));
+    if (view.type !== "table") {
+      const key = view.type === "board" ? "card_properties" : "list_properties";
+      pop.append(h("div", { class: "hint", style: "padding:4px 6px", text: "Show on " + (view.type === "board" ? "cards" : "rows") }));
+      for (const [k, p] of Object.entries(db.schema)) { if (p.type === "title") continue; const on = (view.format[key] || []).includes(k);
+        pop.append(item(p.name, () => { commit("Toggle property", () => { const arr = view.format[key] || []; view.format[key] = on ? arr.filter(x => x !== k) : [...arr, k]; }); viewMenu(cur(), cur().views.find(v => v.id === view.id), document.querySelector(".toolbar .btn.ghost:nth-last-child(2)") || anchor); }, on ? "✓" : "")); }
+    }
+    pop.append(h("div", { class: "sep" }), item("Duplicate view", () => { const c = JSON.parse(JSON.stringify(view)); c.id = uid(); c.name = view.name + " copy"; commit("Duplicate view", () => { db.views.push(c); }); curViewId = c.id; closePop(); render(); }, "⧉"));
+    if (db.views.length > 1) pop.append(item("Delete view", () => { commit("Delete view", () => { db.views = db.views.filter(v => v.id !== view.id); }); curViewId = db.views[0].id; closePop(); render(); toast("Deleted view", { label: "Undo", fn: undo }); }, "🗑"));
+    pop.append(item("Delete database", () => { const d = db; dbs = dbs.filter(x => x !== d); api("DELETE", "/databases/" + d.id).catch(e => { toast("Couldn't delete: " + e.message); reloadOne(d.id); }); undoStack.push({ dbId: d.id, label: "Delete database", snapshot: JSON.stringify(d) }); curId = dbs[0]?.id ?? null; curViewId = dbs[0]?.views[0].id ?? null; closePop(); render(); toast("Deleted " + d.name, { label: "Undo", fn: undo }); }, "✕"));
+  });
+}
+
+$("#newDb").addEventListener("click", async () => { let d; try { d = await api("POST", "/databases", blankDb()); } catch (e) { toast("Couldn't create a database: " + e.message); return; } dbs.push(d); openDb(d.id); setTimeout(() => $(".dbtitle")?.select(), 0); });
+
+// ---- Boot ----
+async function boot() {
+  try { dbs = await api("GET", "/databases?full=1"); }
+  catch (e) {
+    $("#main").replaceChildren(h("div", { class: "empty" }, h("p", { text: e.status === 401 ? "This server needs an access token. Open the page with ?token=YOUR_TOKEN at the end of the address." : "Couldn't reach the Tabula server: " + e.message })));
+    $("#storeNote").textContent = "Not connected."; return;
+  }
+  curId = dbs[0]?.id ?? null; curViewId = dbs[0]?.views[0]?.id ?? null;
+  $("#storeNote").textContent = "Saved to your server.";
+  render();
+  // Live updates: other tabs or API clients changed something.
+  const es = new EventSource("/api/events" + (token ? "?token=" + encodeURIComponent(token) : ""));
+  es.onmessage = e => {
+    let ev; try { ev = JSON.parse(e.data); } catch { return; }
+    if (ev.client === CLIENT_ID) return;
+    const local = dbs.find(d => d.id === ev.id);
+    if (ev.type === "changed" && local && local.version >= ev.version) return;
+    if (editingNow()) { pendingReload.add(ev.id); return; }
+    reloadOne(ev.id);
+  };
+}
+const pendingReload = new Set();
+const editingNow = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) || !$("#pop").hidden;
+document.addEventListener("focusout", () => setTimeout(() => { if (!editingNow() && pendingReload.size) { const ids = [...pendingReload]; pendingReload.clear(); ids.forEach(reloadOne); } }, 50));
+boot();
+})();
+</script>
