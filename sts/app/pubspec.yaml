@@ -68,6 +68,15 @@ flutter:
     - assets/brand/logo-sombre.png
     - assets/brand/embleme.png
     - assets/demo/catalogue.json
+  # Police Roboto intégrée (licence OFL) : le texte s'affiche même sans accès à Google Fonts.
+  fonts:
+    - family: StsRoboto
+      fonts:
+        - asset: assets/fonts/Roboto-400.ttf
+        - asset: assets/fonts/Roboto-500.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-700.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

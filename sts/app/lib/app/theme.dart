@@ -18,6 +18,7 @@ ThemeData stsTheme(Brightness b) {
     brightness: b,
   );
   return ThemeData(
+    fontFamily: 'StsRoboto',
     colorScheme: scheme,
     useMaterial3: true,
     appBarTheme: AppBarTheme(
