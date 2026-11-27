@@ -1,0 +1,58 @@
+STS COMPANY - SERVEUR SUR VOTRE ORDINATEUR
+===========================================
+
+Ce dossier contient le serveur STS et la version web de l'application.
+Une seule adresse sert les deux.
+
+
+1. A FAIRE UNE SEULE FOIS
+-------------------------
+a) Installer Node.js (version LTS, 22.13 ou plus recente) :
+   https://nodejs.org  ->  bouton "LTS"  ->  installer avec les options par defaut.
+
+b) Installer cloudflared (pour l'adresse publique) :
+   Windows : ouvrir PowerShell et taper
+             winget install --id Cloudflare.cloudflared
+   Mac     : brew install cloudflared
+
+c) Creer votre compte administrateur :
+   double-cliquer sur "creer-administrateur.bat" (Mac : creer-administrateur.sh).
+
+
+2. A CHAQUE FOIS
+----------------
+a) Double-cliquer sur "1-demarrer-serveur.bat".
+   Une fenetre noire s'ouvre : LAISSEZ-LA OUVERTE.
+   Testez sur l'ordinateur : http://localhost:3000
+
+b) Double-cliquer sur "2-adresse-publique.bat".
+   Une deuxieme fenetre affiche une adresse du type :
+       https://mots-au-hasard.trycloudflare.com
+   C'est l'adresse a ouvrir sur les telephones (Android et iPhone).
+   LAISSEZ AUSSI CETTE FENETRE OUVERTE.
+
+c) Sur iPhone : ouvrir l'adresse dans Safari, puis
+   Partager -> "Sur l'ecran d'accueil" : l'icone STS apparait.
+   Sur Android : Chrome -> menu -> "Ajouter a l'ecran d'accueil".
+
+
+3. CODES DE VERIFICATION
+------------------------
+Les e-mails ne sont pas encore branches. Quand quelqu'un cree un compte,
+son code a 6 chiffres s'affiche dans la fenetre du serveur, par exemple :
+    [code verification] karim@exemple.dz : 627821
+Transmettez-lui ce code (telephone, WhatsApp).
+
+
+4. A SAVOIR
+-----------
+- L'application ne fonctionne que tant que l'ordinateur est allume,
+  connecte a Internet et que les deux fenetres sont ouvertes.
+  Reglez la mise en veille sur "Jamais" quand l'ordinateur est branche.
+- L'adresse trycloudflare.com CHANGE a chaque lancement de l'etape 2b.
+  Pour une adresse fixe, il faut un nom de domaine (voir avec Claude).
+- Les donnees (comptes, inscriptions, resultats) sont dans le dossier "data".
+  SAUVEGARDEZ-LE regulierement (copie sur une cle USB, par exemple).
+  Ne partagez jamais le fichier data\secret-jwt.txt.
+- Le catalogue des formations est dans "catalogue.json". Il n'est lu qu'au
+  tout premier demarrage (quand le dossier "data" n'existe pas encore).

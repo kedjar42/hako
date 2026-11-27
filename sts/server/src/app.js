@@ -12,8 +12,9 @@ import { randomInt } from 'node:crypto';
  * @param {(user: object, type: 'verification'|'reinitialisation', code: string) => void} [opts.envoyerCode]
  *        Envoie un code par e-mail ou SMS. Par défaut, l'affiche dans la console.
  * @param {boolean} [opts.devCodes] Renvoie les codes dans les réponses (développement uniquement).
+ * @param {string} [opts.webDir] Dossier de la version web de l'application, servie à la racine du site.
  */
-export function createApp({ db, jwtSecret, envoyerCode, devCodes = false }) {
+export function createApp({ db, jwtSecret, envoyerCode, devCodes = false, webDir }) {
   if (!jwtSecret) throw new Error('jwtSecret manquant');
   envoyerCode ??= (u, type, code) => console.log(`[code ${type}] ${u.email} : ${code}`);
 
@@ -392,6 +393,12 @@ export function createApp({ db, jwtSecret, envoyerCode, devCodes = false }) {
 
   // ---------- erreurs ----------
   app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Route introuvable.')));
+
+  // ---------- version web de l'application (facultatif) ----------
+  if (webDir) {
+    app.use(express.static(webDir, { index: 'index.html', maxAge: '1h' }));
+    app.get(/^(?!\/api\/).*/, (_req, res) => res.sendFile('index.html', { root: webDir }));
+  }
   // eslint-disable-next-line no-unused-vars
   app.use((err, _req, res, _next) => {
     if (err instanceof HttpError) return res.status(err.status).json({ erreur: err.message });

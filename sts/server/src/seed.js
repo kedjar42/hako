@@ -3,7 +3,7 @@
 // Le contenu vient de app/assets/demo/catalogue.json (ou du fichier STS_CATALOGUE).
 import bcrypt from 'bcryptjs';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { openDb } from './db.js';
 
 export function seed(db, { adminEmail, adminPassword, catalogue } = {}) {
@@ -50,7 +50,8 @@ export function lireCatalogue(chemin = process.env.STS_CATALOGUE
   return JSON.parse(readFileSync(chemin, 'utf8'));
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Lancé directement (node src/seed.js) ; pathToFileURL gère aussi les chemins Windows (C:\...).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const db = openDb(process.env.STS_DB ?? 'data/sts.db');
   seed(db, { adminEmail: process.env.STS_ADMIN_EMAIL, adminPassword: process.env.STS_ADMIN_PASSWORD });
   console.log('Base initialisée.');

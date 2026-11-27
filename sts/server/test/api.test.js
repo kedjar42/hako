@@ -133,3 +133,28 @@ test('administration protégée', async () => {
   assert.equal(r.status, 201);
   assert.equal(r.body.choix, '["a","b"]');
 });
+
+test('sert la version web à la racine sans masquer l’API', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const dir = mkdtempSync(join(tmpdir(), 'sts-web-'));
+  writeFileSync(join(dir, 'index.html'), '<title>STS web</title>');
+  writeFileSync(join(dir, 'main.dart.js'), 'console.log(1)');
+  const db = openDb(':memory:');
+  seed(db, {});
+  const app = createApp({ db, jwtSecret: 't', webDir: dir });
+  const srv = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
+  const url = `http://localhost:${srv.address().port}`;
+  try {
+    assert.match(await (await fetch(url + '/')).text(), /STS web/);
+    assert.equal(await (await fetch(url + '/main.dart.js')).text(), 'console.log(1)');
+    assert.match(await (await fetch(url + '/formations/12')).text(), /STS web/);
+    const api = await fetch(url + '/api/v1/catalog/categories');
+    assert.equal(api.status, 200);
+    assert.equal((await api.json()).length, 3);
+    assert.equal((await fetch(url + '/api/v1/inconnu')).status, 404);
+  } finally {
+    srv.close();
+  }
+});

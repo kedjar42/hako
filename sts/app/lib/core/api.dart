@@ -3,7 +3,10 @@ import 'package:http/http.dart' as http;
 import 'demo_backend.dart';
 
 /// Adresse de l'API. À la compilation : flutter build apk --dart-define=STS_API=https://api.votre-domaine.dz/api/v1
+/// Valeur spéciale « meme-origine » (version web) : l'API est sur le même site que la page, sous /api/v1.
 const apiBaseUrl = String.fromEnvironment('STS_API', defaultValue: 'http://10.0.2.2:3000/api/v1');
+
+String _urlParDefaut() => apiBaseUrl == 'meme-origine' ? '${Uri.base.origin}/api/v1' : apiBaseUrl;
 
 /// Version de démonstration sans serveur : flutter build apk --dart-define=STS_DEMO=true
 const modeDemo = bool.fromEnvironment('STS_DEMO');
@@ -18,7 +21,7 @@ class ApiException implements Exception {
 
 class Api {
   Api({String? baseUrl, http.Client? client, DemoBackend? demo})
-      : baseUrl = baseUrl ?? apiBaseUrl,
+      : baseUrl = baseUrl ?? _urlParDefaut(),
         _client = client ?? http.Client(),
         demo = demo ?? (modeDemo ? DemoBackend() : null);
 

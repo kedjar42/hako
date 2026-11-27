@@ -24,7 +24,9 @@ Variables d'environnement :
 |---|---|
 | `PORT` | Port d'écoute (défaut 3000) |
 | `STS_DB` | Fichier de base de données (défaut `data/sts.db`) |
-| `STS_JWT_SECRET` | Secret de signature des sessions. **Obligatoire en production** (`NODE_ENV=production`) |
+| `STS_JWT_SECRET` | Secret de signature des sessions. Sinon, généré une fois dans `data/secret-jwt.txt` |
+| `STS_WEB_DIR` | Dossier de la version web à servir à la racine du site (facultatif) |
+| `STS_CATALOGUE` | Catalogue utilisé par `npm run seed` (défaut : `app/assets/demo/catalogue.json`) |
 | `STS_DEV_CODES=1` | Développement uniquement : renvoie les codes de vérification dans les réponses |
 
 **Codes de vérification :** pour l'instant, les codes envoyés à l'inscription et pour « mot de passe oublié » s'affichent dans la console du serveur. Avant la mise en ligne, branchez un service d'e-mail ou de SMS dans l'option `envoyerCode` de `createApp` (`src/app.js`).
@@ -56,6 +58,18 @@ flutter build apk --release --dart-define=STS_API=https://api.votre-domaine.dz/a
 ```
 
 Le fichier se trouve dans `build/app/outputs/flutter-apk/app-release.apk`. Pour le Play Store, il faut une clé de signature : voir la [documentation Flutter](https://docs.flutter.dev/deployment/android).
+
+## Héberger sur votre ordinateur (test)
+
+Le dossier `serveur-portable/` contient des scripts qui lancent le serveur **et** la version web de l'application sur un ordinateur, puis lui donnent une adresse publique HTTPS grâce à un tunnel Cloudflare gratuit.
+
+```bash
+sts/serveur-portable/fabriquer.sh /chemin/de/sortie
+```
+
+Cette commande crée `sts-serveur/`, prêt à copier sur l'ordinateur (Node.js 22.13+ requis). Le mode d'emploi est dans `LISEZMOI.txt`. Dans ce mode, la version web est compilée avec `STS_API=meme-origine` : elle appelle l'API à sa propre adresse, donc elle marche quelle que soit l'adresse du tunnel.
+
+Le serveur sert un dossier web si `STS_WEB_DIR` est défini. Sans `STS_JWT_SECRET`, il crée un secret aléatoire dans `data/secret-jwt.txt` au premier lancement.
 
 ## 3. Personnaliser
 
