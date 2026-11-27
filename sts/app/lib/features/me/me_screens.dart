@@ -4,11 +4,15 @@ import '../../app/widgets.dart';
 import '../../core/session.dart';
 import '../auth/auth_screens.dart';
 
-/// Coordonnées affichées dans « Contacter STS ». À remplacer par les vraies.
+/// Coordonnées de STS Company (Sarl Telecom Space).
 class StsContact {
-  static const telephone = '+213000000000';
-  static const email = 'contact@sts.dz';
-  static const adresse = 'Adresse du centre STS';
+  static const raisonSociale = 'Sarl Telecom Space';
+  static const telephone = '+213698589401';
+  static const telephoneAffiche = '0698 58 94 01';
+  static const email = 'kedjarabdelhak@gmail.com';
+  static const facebook = 'https://www.facebook.com/profile.php?id=61596040366859';
+  static const tiktok = 'https://www.tiktok.com/@abdelhak_kedjar';
+  static const String? adresse = null; // à compléter : adresse du centre
 }
 
 Future<void> ouvrirRessource(BuildContext context, Map<String, dynamic> r) async {
@@ -79,7 +83,7 @@ class CompteScreen extends StatelessWidget {
           },
         ),
       const SizedBox(height: 24),
-      Center(child: Text('STS · version 1.0.0', style: Theme.of(context).textTheme.bodySmall)),
+      Center(child: Text('STS Company · ${StsContact.raisonSociale} · version 1.0.0', style: Theme.of(context).textTheme.bodySmall)),
       const SizedBox(height: 24),
     ]);
   }
@@ -279,20 +283,36 @@ class NotificationsScreen extends StatelessWidget {
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
+
+  Future<void> _ouvrir(BuildContext context, String url, {bool externe = false}) async {
+    final ok = await launchUrl(Uri.parse(url), mode: externe ? LaunchMode.externalApplication : LaunchMode.platformDefault);
+    if (!ok && context.mounted) afficherMessage(context, 'Impossible d’ouvrir ce lien.', erreur: true);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Contacter STS')),
         body: ListView(children: [
-          ListTile(leading: const Icon(Icons.phone), title: const Text('Téléphone'), subtitle: const Text(StsContact.telephone),
-              onTap: () => launchUrl(Uri.parse('tel:${StsContact.telephone}'))),
-          ListTile(leading: const Icon(Icons.chat), title: const Text('WhatsApp'), subtitle: const Text(StsContact.telephone),
-              onTap: () => launchUrl(Uri.parse('https://wa.me/${StsContact.telephone.replaceAll('+', '')}'),
-                  mode: LaunchMode.externalApplication)),
+          const Padding(padding: EdgeInsets.fromLTRB(24, 24, 24, 4), child: Center(child: StsLogo(hauteur: 90))),
+          Text(stsSlogan, textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
+          const SizedBox(height: 12),
+          ListTile(leading: const Icon(Icons.phone), title: const Text('Appeler'), subtitle: const Text(StsContact.telephoneAffiche),
+              onTap: () => _ouvrir(context, 'tel:${StsContact.telephone}')),
+          ListTile(leading: const Icon(Icons.chat), title: const Text('WhatsApp'), subtitle: const Text(StsContact.telephoneAffiche),
+              onTap: () => _ouvrir(context, 'https://wa.me/${StsContact.telephone.replaceAll('+', '')}', externe: true)),
           ListTile(leading: const Icon(Icons.mail_outline), title: const Text('E-mail'), subtitle: const Text(StsContact.email),
-              onTap: () => launchUrl(Uri.parse('mailto:${StsContact.email}'))),
-          ListTile(leading: const Icon(Icons.place_outlined), title: const Text('Adresse'), subtitle: const Text(StsContact.adresse),
-              onTap: () => launchUrl(Uri.parse('https://maps.google.com/?q=${Uri.encodeQueryComponent(StsContact.adresse)}'),
-                  mode: LaunchMode.externalApplication)),
+              onTap: () => _ouvrir(context, 'mailto:${StsContact.email}')),
+          ListTile(leading: const Icon(Icons.facebook), title: const Text('Facebook'), subtitle: const Text('STS Company'),
+              onTap: () => _ouvrir(context, StsContact.facebook, externe: true)),
+          ListTile(leading: const Icon(Icons.music_note), title: const Text('TikTok'), subtitle: const Text('@abdelhak_kedjar'),
+              onTap: () => _ouvrir(context, StsContact.tiktok, externe: true)),
+          if (StsContact.adresse != null)
+            ListTile(leading: const Icon(Icons.place_outlined), title: const Text('Adresse'), subtitle: Text(StsContact.adresse!),
+                onTap: () => _ouvrir(context, 'https://maps.google.com/?q=${Uri.encodeQueryComponent(StsContact.adresse!)}', externe: true)),
+          const SizedBox(height: 24),
+          Center(child: Text('STS Company · ${StsContact.raisonSociale}', style: Theme.of(context).textTheme.bodySmall)),
+          const SizedBox(height: 24),
         ]),
       );
 }

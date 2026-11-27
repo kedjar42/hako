@@ -24,19 +24,19 @@ class AccueilScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [StsColors.bleu, Color(0xFF1C5BC8)]),
+              gradient: const LinearGradient(colors: [StsColors.marine, StsColors.marineClair], begin: Alignment.topLeft, end: Alignment.bottomRight),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(session.connecte ? 'Bonjour ${session.user!['prenom']} 👋' : 'Bienvenue chez STS',
+              Text(session.connecte ? 'Bonjour ${session.user!['prenom']} 👋' : 'Bienvenue chez STS Company',
                   style: t.textTheme.headlineSmall?.copyWith(color: Colors.white)),
               const SizedBox(height: 6),
-              Text('Formations techniques et outils de terrain pour les installateurs.',
+              Text('Installations courant faible et formations.\n$stsSlogan',
                   style: t.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
               const SizedBox(height: 16),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: StsColors.orange, foregroundColor: Colors.white),
+                  style: FilledButton.styleFrom(backgroundColor: StsColors.orange, foregroundColor: StsColors.marine),
                   onPressed: () => allerA(1), child: const Text('Voir les formations')),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white54)),

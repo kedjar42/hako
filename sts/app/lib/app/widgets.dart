@@ -84,21 +84,18 @@ String prixDa(Object? v) {
   return '$s DA';
 }
 
-/// Logo texte provisoire. Remplacez-le par Image.asset('assets/logo.png') quand vous aurez le logo officiel.
+/// Logo officiel STS Company. [surFondSombre] : version blanche pour la barre du haut.
 class StsLogo extends StatelessWidget {
-  const StsLogo({super.key, this.taille = 48, this.clair = false});
-  final double taille;
-  final bool clair;
+  const StsLogo({super.key, this.hauteur = 48, this.surFondSombre = false});
+  final double hauteur;
+  final bool surFondSombre;
   @override
-  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          width: taille, height: taille,
-          decoration: BoxDecoration(color: const Color(0xFFF28C28), borderRadius: BorderRadius.circular(taille / 4)),
-          alignment: Alignment.center,
-          child: Icon(Icons.engineering, color: Colors.white, size: taille * 0.6),
-        ),
-        SizedBox(width: taille / 4),
-        Text('STS', style: TextStyle(fontSize: taille * 0.6, fontWeight: FontWeight.w900, letterSpacing: 2,
-            color: clair ? Colors.white : const Color(0xFF0B3D91))),
-      ]);
+  Widget build(BuildContext context) => Image.asset(
+        surFondSombre ? 'assets/brand/logo-sombre.png' : 'assets/brand/logo-clair.png',
+        height: hauteur,
+        semanticLabel: 'STS Company',
+        fit: BoxFit.contain,
+      );
 }
+
+const stsSlogan = 'Experts du terrain, passionnés de transmission.';

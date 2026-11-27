@@ -55,7 +55,7 @@ export function seed(db, { adminEmail, adminPassword }) {
   q('Laquelle de ces adresses est privée ?', ['8.8.8.8', '172.20.1.5', '100.1.1.1', '193.0.0.1'], 1,
     '172.16.0.0 à 172.31.255.255 est une plage privée (RFC 1918).', 3);
 
-  run('INSERT INTO annonces (titre, contenu) VALUES (?, ?)', 'Bienvenue sur l’application STS',
+  run('INSERT INTO annonces (titre, contenu) VALUES (?, ?)', 'Bienvenue sur l’application STS Company',
     'Consultez nos formations, inscrivez-vous aux sessions et utilisez la boîte à outils du technicien.');
 }
 

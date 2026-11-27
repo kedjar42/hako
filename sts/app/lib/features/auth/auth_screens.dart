@@ -91,7 +91,8 @@ class _ConnexionScreenState extends State<ConnexionScreen> {
 
   @override
   Widget build(BuildContext context) => _Formulaire(titre: 'Connexion', formKey: _form, children: [
-        const Center(child: StsLogo(taille: 72)),
+        const Center(child: StsLogo(hauteur: 110)),
+        Text(stsSlogan, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
         TextFormField(
           controller: _email, validator: validerEmail, keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],

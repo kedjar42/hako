@@ -59,7 +59,7 @@ class _CoquilleState extends State<Coquille> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: _onglet == 0 ? const StsLogo(taille: 30, clair: true) : Text(_titres[_onglet]),
+        title: _onglet == 0 ? const StsLogo(hauteur: 40, surFondSombre: true) : Text(_titres[_onglet]),
         actions: [
           if (session.connecte)
             IconButton(
