@@ -1,0 +1,22 @@
+{
+  "name": "sts-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API de la plateforme de formation STS",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "seed": "node src/seed.js",
+    "test": "node --test --disable-warning=ExperimentalWarning test/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^4.22.3",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
