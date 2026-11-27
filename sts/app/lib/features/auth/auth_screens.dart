@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import '../../app/widgets.dart';
+import '../../core/demo_backend.dart';
 import '../../core/session.dart';
 
 /// Ouvre l'écran de connexion. Renvoie true si l'utilisateur s'est connecté.
@@ -111,6 +112,19 @@ class _ConnexionScreenState extends State<ConnexionScreen> {
             ),
           ),
         ),
+        if (SessionScope.read(context).api.demo != null)
+          Card(
+            color: Theme.of(context).colorScheme.tertiaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.science_outlined),
+              title: const Text('Compte de démonstration'),
+              subtitle: const Text('${DemoBackend.emailDemo} / ${DemoBackend.motDePasseDemo}'),
+              trailing: TextButton(
+                onPressed: () { _email.text = DemoBackend.emailDemo; _mdp.text = DemoBackend.motDePasseDemo; },
+                child: const Text('Remplir'),
+              ),
+            ),
+          ),
         _Bouton(texte: 'Se connecter', enCours: _enCours, onPressed: _valider),
         TextButton(
           onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MotDePasseOublieScreen())),
@@ -209,6 +223,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) => _Formulaire(titre: 'Vérification', formKey: _form, children: [
         Text('Saisissez le code à 6 chiffres envoyé à ${widget.email}.'),
+        if (SessionScope.read(context).api.demo != null)
+          const Text('Version de démonstration : le code est ${DemoBackend.codeDemo}.', style: TextStyle(fontWeight: FontWeight.bold)),
         TextFormField(
           controller: _code, keyboardType: TextInputType.number, maxLength: 6,
           validator: (v) => v != null && RegExp(r'^\d{6}$').hasMatch(v.trim()) ? null : 'Code à 6 chiffres',

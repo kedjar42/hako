@@ -72,10 +72,11 @@ test('catalogue public et inscription à une session', async () => {
   let r = await call('GET', '/public/home');
   assert.equal(r.status, 200);
   assert.ok(r.body.formations.length >= 4);
-  assert.equal(r.body.annonces.length, 1);
+  assert.equal(r.body.annonces.length, 2);
 
-  r = await call('GET', '/catalog/formations?q=fibre');
+  r = await call('GET', '/catalog/formations?q=IPBX');
   assert.equal(r.body.length, 1);
+  assert.equal((await call('GET', '/catalog/categories')).body.length, 3);
 
   const sessions = (await call('GET', '/catalog/sessions')).body;
   assert.ok(sessions.length >= 1);

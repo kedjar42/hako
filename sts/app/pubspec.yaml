@@ -67,6 +67,7 @@ flutter:
     - assets/brand/logo-clair.png
     - assets/brand/logo-sombre.png
     - assets/brand/embleme.png
+    - assets/demo/catalogue.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

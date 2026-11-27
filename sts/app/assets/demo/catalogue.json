@@ -1,0 +1,136 @@
+{
+  "_note": "Catalogue d'exemple STS Company. Utilisé par la version de démonstration de l'application et par le serveur (npm run seed). Prix : null = sur demande.",
+  "categories": [
+    { "nom": "Fibre optique", "icone": "cable" },
+    { "nom": "Réseaux informatiques", "icone": "lan" },
+    { "nom": "Téléphonie IP (VoIP)", "icone": "phone_in_talk" }
+  ],
+  "formations": [
+    {
+      "categorie": "Fibre optique",
+      "titre": "Technicien fibre optique FTTH",
+      "resume": "Raccorder un abonné à la fibre : du point de branchement optique jusqu’à la prise chez le client.",
+      "description": "Formation pratique pour devenir technicien de raccordement FTTH. Vous apprenez à identifier les fibres, préparer les câbles, poser et raccorder les boîtiers et vérifier la liaison avec un photomètre.",
+      "programme": "1. Architecture d’un réseau FTTH (OLT, coupleurs, PBO, PTO)\n2. Types de fibres et de câbles, code couleur\n3. Préparation des câbles et des tubes\n4. Soudure par fusion et connecteurs\n5. Raccordement d’un abonné\n6. Mesures au photomètre et recette",
+      "duree_heures": 30,
+      "niveau": "Débutant",
+      "prix_da": null,
+      "sessions": [
+        { "debut_dans_jours": 10, "duree_jours": 5, "lieu": "Centre STS", "places": 10 },
+        { "debut_dans_jours": 40, "duree_jours": 5, "lieu": "Centre STS", "places": 10 }
+      ],
+      "tests": [
+        {
+          "titre": "Quiz : fibre optique",
+          "description": "Code couleur, longueurs d’onde et bilan optique.",
+          "duree_minutes": 10,
+          "questions": [
+            { "enonce": "Dans le code couleur standard à 12 fibres, quelle est la couleur de la fibre n° 1 ?", "choix": ["Rouge", "Bleu", "Blanc", "Vert"], "bonne_reponse": 1, "explication": "L’ordre commence par : bleu, orange, vert, marron, gris, blanc…" },
+            { "enonce": "Quelle est la couleur de la fibre n° 2 ?", "choix": ["Orange", "Vert", "Marron", "Jaune"], "bonne_reponse": 0, "explication": "Bleu (1), orange (2), vert (3), marron (4)." },
+            { "enonce": "Quelle fibre utilise-t-on pour un réseau FTTH ?", "choix": ["Multimode OM3", "Monomode", "Fibre plastique", "Multimode OM1"], "bonne_reponse": 1, "explication": "Le FTTH utilise de la fibre monomode (G.652 / G.657)." },
+            { "enonce": "Un coupleur 1:32 introduit une perte d’environ :", "choix": ["3,5 dB", "10,5 dB", "17 dB", "32 dB"], "bonne_reponse": 2, "explication": "Environ 17 dB pour un coupleur 1:32 (environ 3,5 dB à chaque division par 2)." },
+            { "enonce": "Quel appareil mesure la puissance reçue chez l’abonné ?", "choix": ["Un multimètre", "Un photomètre (power meter)", "Un testeur RJ45", "Un oscilloscope"], "bonne_reponse": 1, "explication": "Le photomètre mesure la puissance optique en dBm." }
+          ]
+        }
+      ]
+    },
+    {
+      "categorie": "Fibre optique",
+      "titre": "Soudure et mesures optiques (OTDR)",
+      "resume": "Maîtriser la soudeuse et interpréter une courbe de réflectomètre (OTDR).",
+      "description": "Perfectionnement pour techniciens déjà à l’aise avec la fibre : réglages de la soudeuse, qualité des soudures, mesures de réflectométrie et rédaction d’un rapport de recette.",
+      "programme": "1. Rappels sur l’atténuation et la réflexion\n2. Soudeuse : préparation, clivage, réglages\n3. OTDR : principe et paramètres\n4. Lecture d’une courbe : soudures, connecteurs, cassures\n5. Rapport de recette",
+      "duree_heures": 18,
+      "niveau": "Avancé",
+      "prix_da": null,
+      "sessions": [
+        { "debut_dans_jours": 25, "duree_jours": 3, "lieu": "Centre STS", "places": 8 }
+      ],
+      "tests": []
+    },
+    {
+      "categorie": "Réseaux informatiques",
+      "titre": "Bases des réseaux TCP/IP",
+      "resume": "Adressage IP, masques, switchs et routeurs : les fondamentaux pour les techniciens.",
+      "description": "Comprendre comment les équipements communiquent sur un réseau, calculer un plan d’adressage et diagnostiquer les pannes les plus courantes.",
+      "programme": "1. Modèles OSI et TCP/IP\n2. Câblage RJ45 (T568A / T568B)\n3. Adressage IPv4, masques et sous-réseaux\n4. Switchs et VLAN\n5. Passerelle, DNS et DHCP\n6. Diagnostic : ping, traceroute, nslookup",
+      "duree_heures": 18,
+      "niveau": "Débutant",
+      "prix_da": null,
+      "sessions": [
+        { "debut_dans_jours": 14, "duree_jours": 3, "lieu": "Centre STS", "places": 15 }
+      ],
+      "tests": [
+        {
+          "titre": "Quiz : adressage IPv4",
+          "description": "Vérifiez vos connaissances sur les adresses IP et les masques.",
+          "duree_minutes": 10,
+          "questions": [
+            { "enonce": "Combien d’adresses utilisables pour des hôtes dans un réseau /24 ?", "choix": ["254", "256", "255", "128"], "bonne_reponse": 0, "explication": "2⁸ = 256 adresses, moins l’adresse réseau et l’adresse de diffusion." },
+            { "enonce": "Quel masque correspond à /26 ?", "choix": ["255.255.255.0", "255.255.255.192", "255.255.255.224", "255.255.255.128"], "bonne_reponse": 1, "explication": "26 bits à 1 : le dernier octet vaut 11000000 = 192." },
+            { "enonce": "Laquelle de ces adresses est privée ?", "choix": ["8.8.8.8", "172.20.1.5", "100.1.1.1", "193.0.0.1"], "bonne_reponse": 1, "explication": "172.16.0.0 à 172.31.255.255 est une plage privée (RFC 1918)." }
+          ]
+        }
+      ]
+    },
+    {
+      "categorie": "Réseaux informatiques",
+      "titre": "Configuration de switchs et routeurs",
+      "resume": "VLAN, routage inter-VLAN, accès Wi-Fi et sécurisation d’un petit réseau d’entreprise.",
+      "description": "Mettre en service le réseau d’une PME : configuration des switchs administrables, création des VLAN, routage, points d’accès Wi-Fi et bonnes pratiques de sécurité.",
+      "programme": "1. Accès aux équipements (console, SSH, interface web)\n2. VLAN et ports trunk\n3. Routage inter-VLAN\n4. Wi-Fi : SSID, sécurité WPA2/WPA3\n5. Sauvegarde des configurations",
+      "duree_heures": 24,
+      "niveau": "Intermédiaire",
+      "prix_da": null,
+      "sessions": [
+        { "debut_dans_jours": 35, "duree_jours": 4, "lieu": "Centre STS", "places": 12 }
+      ],
+      "tests": []
+    },
+    {
+      "categorie": "Téléphonie IP (VoIP)",
+      "titre": "Bases de la voix sur IP",
+      "resume": "Comprendre comment la voix passe sur un réseau : SIP, codecs et qualité d’appel.",
+      "description": "Introduction à la téléphonie IP : fonctionnement d’un appel SIP, choix des codecs, besoins du réseau et causes des coupures ou de l’écho.",
+      "programme": "1. De la téléphonie classique à la VoIP\n2. Protocole SIP et RTP\n3. Codecs (G.711, G.729, Opus) et bande passante\n4. Qualité de service (QoS, VLAN voix)\n5. Pannes courantes : son à sens unique, écho, coupures",
+      "duree_heures": 12,
+      "niveau": "Débutant",
+      "prix_da": null,
+      "sessions": [
+        { "debut_dans_jours": 18, "duree_jours": 2, "lieu": "Centre STS", "places": 15 }
+      ],
+      "tests": [
+        {
+          "titre": "Quiz : téléphonie IP",
+          "description": "SIP, ports et codecs.",
+          "duree_minutes": 10,
+          "questions": [
+            { "enonce": "Quel protocole établit les appels en téléphonie IP ?", "choix": ["HTTP", "SIP", "FTP", "SMTP"], "bonne_reponse": 1, "explication": "SIP (Session Initiation Protocol) gère l’établissement et la fin des appels." },
+            { "enonce": "Quel est le port SIP par défaut ?", "choix": ["80", "443", "5060", "3389"], "bonne_reponse": 2, "explication": "5060 en UDP/TCP, 5061 pour SIP chiffré (TLS)." },
+            { "enonce": "Quel protocole transporte la voix pendant l’appel ?", "choix": ["RTP", "SIP", "DNS", "ARP"], "bonne_reponse": 0, "explication": "RTP transporte le flux audio ; SIP ne sert qu’à la signalisation." },
+            { "enonce": "Le codec G.711 utilise un débit audio de :", "choix": ["8 kb/s", "16 kb/s", "64 kb/s", "128 kb/s"], "bonne_reponse": 2, "explication": "G.711 : 64 kb/s de voix (environ 87 kb/s avec les en-têtes IP)." },
+            { "enonce": "On entend son correspondant, mais lui ne nous entend pas. Cause la plus fréquente ?", "choix": ["Câble HDMI", "Problème de NAT ou de pare-feu sur les flux RTP", "Mauvais code PIN", "Écran éteint"], "bonne_reponse": 1, "explication": "Le son à sens unique vient très souvent du NAT ou du pare-feu qui bloque le RTP dans un sens." }
+          ]
+        }
+      ]
+    },
+    {
+      "categorie": "Téléphonie IP (VoIP)",
+      "titre": "Installer un standard téléphonique IP (IPBX)",
+      "resume": "Mettre en service un IPBX : postes, groupes d’appel, messagerie vocale et lignes opérateur.",
+      "description": "Installation et configuration complète d’un standard téléphonique IP pour une entreprise : création des postes, menus vocaux, files d’attente et raccordement aux lignes de l’opérateur.",
+      "programme": "1. Choisir un IPBX et ses téléphones\n2. Installation et premier accès\n3. Création des postes et provisioning\n4. Groupes d’appel, renvois, messagerie vocale\n5. Menu vocal (SVI) et files d’attente\n6. Lignes opérateur (trunk SIP)",
+      "duree_heures": 21,
+      "niveau": "Intermédiaire",
+      "prix_da": null,
+      "sessions": [
+        { "debut_dans_jours": 45, "duree_jours": 3, "lieu": "Centre STS", "places": 10 }
+      ],
+      "tests": []
+    }
+  ],
+  "annonces": [
+    { "titre": "Bienvenue sur l’application STS Company", "contenu": "Consultez nos formations, inscrivez-vous aux sessions et utilisez la boîte à outils du technicien." },
+    { "titre": "Bientôt de nouvelles formations", "contenu": "D’autres formations en courant faible arrivent prochainement. Restez connectés !" }
+  ]
+}

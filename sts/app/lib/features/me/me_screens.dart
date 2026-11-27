@@ -82,6 +82,17 @@ class CompteScreen extends StatelessWidget {
             if (ok == true) await session.deconnecter();
           },
         ),
+      if (session.api.demo != null)
+        ListTile(
+          leading: const Icon(Icons.restart_alt),
+          title: const Text('Réinitialiser la démonstration'),
+          subtitle: const Text('Efface les comptes, inscriptions et résultats de test'),
+          onTap: () async {
+            await session.deconnecter();
+            await session.api.demo!.reinitialiser();
+            if (context.mounted) afficherMessage(context, 'Démonstration réinitialisée.');
+          },
+        ),
       const SizedBox(height: 24),
       Center(child: Text('STS Company · ${StsContact.raisonSociale} · version 1.0.0', style: Theme.of(context).textTheme.bodySmall)),
       const SizedBox(height: 24),

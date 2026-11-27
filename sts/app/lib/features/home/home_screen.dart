@@ -21,6 +21,15 @@ class AccueilScreen extends StatelessWidget {
         final formations = data['formations'] as List;
         final sessions = data['prochaines_sessions'] as List;
         return ListView(padding: const EdgeInsets.all(16), children: [
+          if (session.api.demo != null)
+            Card(
+              color: t.colorScheme.tertiaryContainer,
+              child: const ListTile(
+                leading: Icon(Icons.science_outlined),
+                title: Text('Version de démonstration'),
+                subtitle: Text('Les données sont des exemples, enregistrés uniquement sur ce téléphone.'),
+              ),
+            ),
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(

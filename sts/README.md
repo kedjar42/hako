@@ -41,6 +41,14 @@ flutter run --dart-define=STS_API=http://10.0.2.2:3000/api/v1
 
 `10.0.2.2` est l'adresse de votre ordinateur vue depuis l'émulateur Android. Sur un vrai téléphone, utilisez l'adresse de votre serveur.
 
+**Version de démonstration (sans serveur) :** l'application embarque un faux serveur qui lit `app/assets/demo/catalogue.json` et garde les données sur le téléphone. Compte de démonstration : `demo@sts.dz` / `demo1234`, code de vérification `123456`.
+
+```bash
+flutter build apk --release --dart-define=STS_DEMO=true
+```
+
+**Catalogue :** `app/assets/demo/catalogue.json` contient les catégories, formations, sessions, tests et annonces. Il sert à la version de démonstration **et** au serveur (`npm run seed`).
+
 **Construire l'APK :**
 
 ```bash
